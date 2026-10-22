@@ -1,0 +1,674 @@
+Pour ton application, je partirais sur une ambiance “carnet personnel / boutique premium / gestion d’argent douce” : marron, beige, crème, avec des cartes arrondies et beaucoup d’espace.
+
+1. Direction artistique
+
+Palette principale :
+
+Usage	Couleur
+Fond principal	#F7F1E8
+Surface / cartes	#FFFDF9
+Marron principal	#6B4226
+Marron foncé	#3E2723
+Marron secondaire	#8B6245
+Beige	#E8D8C3
+Beige clair	#F1E6D6
+Texte principal	#332821
+Texte secondaire	#806F62
+Succès	#718355
+Alerte	#C58B45
+Erreur	#A65D57
+
+L'idée est d'éviter un design "banque froide". L'application doit donner l'impression que l'utilisateur prend tranquillement le contrôle de ses achats et de son argent.
+
+2. Structure de l'application
+
+Je te conseille cette structure :
+
+                     BuyFlow
+                        │
+        ┌───────────────┼────────────────┐
+        │               │                │
+     Dashboard        Achats          Tirelire
+        │               │                │
+        │               ├── Achat        ├── Solde
+        │               │      │         ├── Dépôt
+        │               │      └── Articles
+        │               │                └── Retrait
+        │               │
+        │               └── Priorités
+        │
+        └── Objectifs d'épargne
+
+Avec React côté frontend et Spring Boot côté backend.
+
+3. Navigation
+
+Sur desktop, je ferais une sidebar verticale.
+
+┌──────────────────────────────────────────────────────────┐
+│                                                          │
+│  🟤 BuyFlow                                              │
+│                                                          │
+│  PRINCIPAL                                               │
+│                                                          │
+│  ◉  Dashboard                                            │
+│  🛍  Mes achats                                          │
+│  🐷  Ma tirelire                                         │
+│  🎯  Objectifs                                           │
+│                                                          │
+│  ─────────────────────────                               │
+│                                                          │
+│  ⚙  Paramètres                                           │
+│                                                          │
+│                                                          │
+│  ┌─────────────────────┐                                 │
+│  │ 👤 Thierno          │                                 │
+│  │    Mon compte       │                                 │
+│  └─────────────────────┘                                 │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+
+Sur mobile, elle devient une navigation basse ou un menu hamburger.
+
+4. Dashboard
+
+C'est la page la plus importante.
+
+Je ne mettrais pas immédiatement 15 graphiques.
+
+Le dashboard doit répondre à quatre questions :
+
+💰 Combien j'ai ?
+
+🛍️ Qu'est-ce que je veux acheter ?
+
+🔥 Qu'est-ce qui est prioritaire ?
+
+🎯 Où en suis-je dans mon épargne ?
+
+Exemple
+Bonjour Thierno 👋
+
+
+Voici où tu en es aujourd'hui.
+
+
+┌─────────────────────────┐
+│ 🐷 Ma tirelire          │
+│                         │
+│ 150 000 FCFA            │
+│                         │
+│ + Ajouter de l'argent   │
+└─────────────────────────┘
+
+
+┌─────────────────────────┐
+│ 🛍️ Mes achats           │
+│                         │
+│ 520 000 FCFA            │
+│                         │
+│ 4 achats en cours       │
+└─────────────────────────┘
+
+
+┌─────────────────────────┐
+│ 🎯 Épargne              │
+│                         │
+│ 150 000 / 300 000       │
+│ ███████████░░ 50%       │
+└─────────────────────────┘
+
+Puis :
+
+Mes achats prioritaires
+Mes achats prioritaires
+
+
+┌───────────────────────────────────────────┐
+│ 🔴 Habits                                 │
+│                                           │
+│ 70 000 FCFA                               │
+│ 4 articles                                │
+│                                           │
+│ ███████████████░░░ 80%                    │
+│                                           │
+│ Priorité : Urgent                        │
+└───────────────────────────────────────────┘
+5. Page "Mes achats"
+
+Ici, je privilégierais des cards, plutôt qu'un tableau classique.
+
+Mes achats                              + Nouvel achat
+
+
+
+
+🔎 Rechercher un achat       Tous ▼
+
+
+
+
+┌───────────────────┐
+│ 👕                │
+│                   │
+│ Habits            │
+│                   │
+│ 70 000 FCFA       │
+│ 5 articles        │
+│                   │
+│ 🔴 Urgent         │
+│                   │
+│ █████████░ 80%    │
+└───────────────────┘
+
+
+┌───────────────────┐
+│ 💻                │
+│                   │
+│ Ordinateur        │
+│                   │
+│ 300 000 FCFA      │
+│ 3 articles        │
+│                   │
+│ 🟠 Important      │
+│                   │
+│ ██░░░░░░░ 20%     │
+└───────────────────┘
+6. Création d'un achat
+
+Le bouton :
+
++ Nouvel achat
+
+ouvre une page ou une modal.
+
+Créer un nouvel achat
+
+
+Nom de l'achat
+[ Habits pour les vacances              ]
+
+
+Description
+[ Quelques vêtements pour les vacances ]
+
+
+Priorité
+[ 🔴 Urgent                         ▼ ]
+
+
+Date prévue
+[ 15 Septembre 2026                   ]
+
+
+                Annuler    Créer l'achat
+
+Après création :
+
+Achat "Habits" créé 🎉
+
+Puis l'utilisateur arrive directement dans :
+
+Ajouter des articles
+
+7. Page détail d'un achat
+
+C'est une page importante.
+
+← Mes achats
+
+
+Habits
+Vêtements pour les vacances
+
+
+🔴 Urgent
+
+
+70 000 FCFA
+5 articles
+
+
+██████████████░░ 80%
+
+
+────────────────────────────────
+
+
+Articles                         + Ajouter
+
+
+┌─────────────────────────────────────────┐
+│ [PHOTO]  Jean noir                      │
+│          2 × 15 000 FCFA                │
+│          30 000 FCFA                    │
+│                                         │
+│          ✓ Acheté                       │
+└─────────────────────────────────────────┘
+
+
+┌─────────────────────────────────────────┐
+│ [PHOTO]  T-shirt                        │
+│          3 × 5 000 FCFA                 │
+│          15 000 FCFA                    │
+│                                         │
+│          ○ À acheter                    │
+└─────────────────────────────────────────┘
+8. Ajout d'un article
+
+Là, je ferais quelque chose de visuel.
+
+Ajouter un article
+
+
+┌──────────────────────────┐
+│                          │
+│       📷                 │
+│                          │
+│  Ajouter une photo       │
+│                          │
+└──────────────────────────┘
+
+
+Nom
+[ Jean noir                         ]
+
+
+Description
+[ Jean noir coupe droite            ]
+
+
+Quantité
+[ 2 ]
+
+
+Prix unitaire
+[ 15 000 ] FCFA
+
+
+Magasin / source
+[ Zara                             ]
+
+
+────────────────────────────
+
+
+Total : 30 000 FCFA
+
+
+             Ajouter l'article
+
+La photo est importante dans ton concept : elle sert de mémoire visuelle.
+
+9. La tirelire 🐷
+
+Je lui donnerais une identité particulière.
+
+Au lieu d'une simple page financière froide :
+
+Ma tirelire
+
+
+        🐷
+
+
+     150 000 FCFA
+
+
+   Argent disponible
+
+
+──────────────────────────
+
+
+     + Ajouter
+     - Retirer
+
+Puis :
+
+Historique
+Aujourd'hui
+
+
++ 20 000 FCFA
+Épargne mensuelle
+
+
+Hier
+
+
+- 15 000 FCFA
+Achat d'un jean
+
+
+10 août
+
+
++ 30 000 FCFA
+Argent ajouté
+
+Le montant pourrait être présenté dans une grande carte marron avec une texture très légère ou un dégradé marron/beige.
+
+10. Objectifs d'épargne
+
+Cette page peut être très jolie.
+
+Mes objectifs
+
+
+                              + Nouvel objectif
+
+
+
+
+┌─────────────────────────────────────────┐
+│ 💻 Acheter mon ordinateur               │
+│                                         │
+│ 150 000 / 300 000 FCFA                  │
+│                                         │
+│ █████████████░░░░░░ 50%                 │
+│                                         │
+│ Il reste 150 000 FCFA                  │
+│                                         │
+│ 🎯 Objectif : 30 Novembre 2026          │
+└─────────────────────────────────────────┘
+
+Et surtout :
+
+Pour atteindre ton objectif, essaie de mettre de côté 50 000 FCFA / mois.
+
+Ça donne une vraie valeur à l'application.
+
+11. Architecture React
+
+Je partirais sur :
+
+src/
+│
+├── assets/
+│
+├── components/
+│   ├── ui/
+│   ├── layout/
+│   │   ├── Sidebar.jsx
+│   │   ├── Navbar.jsx
+│   │   └── AppLayout.jsx
+│   │
+│   ├── achat/
+│   │   ├── AchatCard.jsx
+│   │   ├── AchatForm.jsx
+│   │   ├── AchatHeader.jsx
+│   │   └── ArticleCard.jsx
+│   │
+│   ├── tirelire/
+│   │   ├── SoldeCard.jsx
+│   │   ├── TransactionCard.jsx
+│   │   └── TransactionForm.jsx
+│   │
+│   └── objectifs/
+│       ├── ObjectifCard.jsx
+│       └── ObjectifForm.jsx
+│
+├── pages/
+│   ├── Login.jsx
+│   ├── Register.jsx
+│   ├── Dashboard.jsx
+│   ├── Achats.jsx
+│   ├── AchatDetail.jsx
+│   ├── Tirelire.jsx
+│   ├── Objectifs.jsx
+│   └── Profile.jsx
+│
+├── services/
+│   ├── api.js
+│   ├── achatService.js
+│   ├── articleService.js
+│   ├── tirelireService.js
+│   └── objectifService.js
+│
+├── hooks/
+│
+├── context/
+│   └── AuthContext.jsx
+│
+├── utils/
+│
+├── App.jsx
+└── main.jsx
+Stack React
+
+Je choisirais :
+
+React
+Vite
+React Router
+Tailwind CSS
+Lucide React pour les icônes
+Axios pour les appels API
+React Hook Form pour les formulaires
+Zod pour la validation
+
+Pour les animations, Framer Motion peut être ajouté plus tard.
+
+12. Architecture Spring Boot
+
+Côté backend :
+
+com.buyflow
+│
+├── config/
+│
+├── security/
+│
+├── controller/
+│   ├── AuthController.java
+│   ├── AchatController.java
+│   ├── ArticleController.java
+│   ├── TirelireController.java
+│   ├── TransactionController.java
+│   └── ObjectifEpargneController.java
+│
+├── service/
+│   ├── AchatService.java
+│   ├── ArticleService.java
+│   ├── TirelireService.java
+│   ├── TransactionService.java
+│   └── ObjectifEpargneService.java
+│
+├── repository/
+│   ├── UtilisateurRepository.java
+│   ├── AchatRepository.java
+│   ├── ArticleRepository.java
+│   ├── TirelireRepository.java
+│   ├── TransactionRepository.java
+│   └── ObjectifEpargneRepository.java
+│
+├── entity/
+│   ├── Utilisateur.java
+│   ├── Achat.java
+│   ├── Article.java
+│   ├── PhotoArticle.java
+│   ├── Tirelire.java
+│   ├── Transaction.java
+│   └── ObjectifEpargne.java
+│
+├── dto/
+│
+├── mapper/
+│
+├── exception/
+│
+└── BuyFlowApplication.java
+13. API REST
+
+On peut partir sur quelque chose de propre :
+
+Auth
+POST /api/auth/register
+POST /api/auth/login
+POST /api/auth/logout
+GET  /api/auth/me
+Achats
+GET    /api/achats
+GET    /api/achats/{id}
+POST   /api/achats
+PUT    /api/achats/{id}
+DELETE /api/achats/{id}
+Articles
+GET    /api/achats/{achatId}/articles
+POST   /api/achats/{achatId}/articles
+PUT    /api/articles/{id}
+DELETE /api/articles/{id}
+PATCH  /api/articles/{id}/statut
+Tirelire
+GET  /api/tirelire
+POST /api/tirelire/depot
+POST /api/tirelire/retrait
+GET  /api/tirelire/transactions
+Objectifs
+GET    /api/objectifs
+GET    /api/objectifs/{id}
+POST   /api/objectifs
+PUT    /api/objectifs/{id}
+DELETE /api/objectifs/{id}
+Dashboard
+GET /api/dashboard
+
+Le endpoint dashboard pourrait renvoyer directement :
+
+{
+  "solde": 150000,
+  "totalAchats": 520000,
+  "montantRestant": 370000,
+  "nombreAchats": 4,
+  "achatsUrgents": 1,
+  "objectifsEnCours": 2
+}
+14. Le design system React
+
+Je créerais des composants réutilisables dès le début :
+
+Button
+Input
+Select
+Modal
+Card
+Badge
+ProgressBar
+Avatar
+Dropdown
+Toast
+EmptyState
+ConfirmDialog
+
+Par exemple :
+
+<Button variant="primary">
+  + Nouvel achat
+</Button>
+
+ou :
+
+<Badge variant="urgent">
+  Urgent
+</Badge>
+
+Cela évite d'avoir du CSS différent partout.
+
+15. Style des boutons
+Principal
+┌────────────────────────┐
+│   + Nouvel achat       │
+└────────────────────────┘
+
+Marron #6B4226.
+
+Secondaire
+
+Fond beige :
+
+#E8D8C3
+
+Danger
+
+Marron/rouge doux :
+
+#A65D57
+
+Je déconseille le rouge vif classique #FF0000, qui casserait complètement l'ambiance.
+
+16. Typographie
+
+Je prendrais DM Sans ou Inter pour l'interface.
+
+Mais pour certains gros titres, on pourrait utiliser une police légèrement plus chaleureuse comme DM Serif Display.
+
+Par exemple :
+
+Mes achats
+
+en serif élégante,
+
+et le reste en sans-serif.
+
+Cela donnerait un côté carnet / lifestyle / premium.
+
+17. Ce que je ferais pour le MVP
+
+Ne commence surtout pas par tout développer.
+
+Je construirais dans cet ordre :
+
+Phase 1 — UI
+Layout
+Sidebar
+Dashboard
+Page achats
+Détail achat
+Formulaire article
+Tirelire
+Objectifs
+Login/Register
+Phase 2 — Backend
+Spring Boot
+PostgreSQL
+Entities
+Repositories
+Services
+Controllers
+DTO
+Validation
+Security
+Phase 3 — Connexion Front/Back
+React
+  ↓
+Axios
+  ↓
+REST API
+  ↓
+Spring Boot
+  ↓
+JPA/Hibernate
+  ↓
+PostgreSQL
+Phase 4 — Fonctionnalités intelligentes
+calcul automatique des totaux ;
+calcul du solde ;
+priorités ;
+progression ;
+recommandations d'épargne.
+18. Et surtout : l'identité de BuyFlow
+
+Je ne ferais pas une application qui ressemble à un logiciel comptable.
+
+L'objectif est plutôt :
+
+"Je veux acheter plusieurs choses → je les organise → je sais combien ça coûte → je mets de l'argent de côté → je sais ce que je peux acheter maintenant."
+
+Donc visuellement :
+
+☕ chaleureux + 🛍️ lifestyle + 💰 gestion financière + 🎯 objectifs
+
+C'est cette combinaison qui peut rendre le projet vraiment agréable à utiliser.
+
+Pour la suite, le meilleur point de départ est de concevoir précisément les écrans du MVP (Login → Dashboard → Achats → Détail Achat → Ajout Article → Tirelire → Objectifs), puis de transformer ces écrans en composants React avant d'attaquer Spring Boot

@@ -1,0 +1,1374 @@
+openapi: 3.0.3
+info:
+  title: Kalpee MVP — API REST
+  description: |
+    Spécification OpenAPI 3.0.3 complète du backend **Kalpee** (`com.kalpee`).
+    Kalpee permet de planifier ses achats (achats, articles, photos, priorités) et de gérer son budget d'épargne (tirelire, transactions, objectifs d'épargne) en FCFA.
+
+    ### Authentification & Sécurité
+    - **Cookie JWT HttpOnly** (`KALPEE_SESSION`) émis lors de `POST /api/auth/register`, `POST /api/auth/login` ou à l'issue du flux OAuth2 Google (`GET /api/oauth2/authorization/google`).
+    - **Protection CSRF** : cookie `XSRF-TOKEN` (lisible par le client JavaScript) à renvoyer dans l'en-tête HTTP `X-XSRF-TOKEN` sur les requêtes mutatives (`POST`, `PUT`, `PATCH`, `DELETE`).
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Serveur de développement local
+  - url: /
+    description: Reverse proxy Nginx (domaine unique)
+
+tags:
+  - name: Authentification
+    description: Inscription, connexion classique, déconnexion, session courante et OAuth2 Google
+  - name: Profil
+    description: Consultation et modification du profil et du mot de passe
+  - name: Achats
+    description: Gestion des achats planifiés, filtrage par recherche et priorité
+  - name: Articles
+    description: Gestion des articles d'un achat, changement de statut et photos
+  - name: Tirelire
+    description: Consultation du solde, dépôts, retraits et historique paginé des transactions
+  - name: Objectifs
+    description: Gestion et suivi des objectifs d'épargne et de l'effort mensuel recommandé
+  - name: Dashboard
+    description: Vue synthétique complète (budget, achats, priorités, objectifs)
+
+security:
+  - cookieAuth: []
+    csrfToken: []
+
+paths:
+  /api/auth/register:
+    post:
+      tags: [Authentification]
+      summary: Créer un nouveau compte utilisateur (F01)
+      security:
+        - csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Compte créé avec succès et session initialisée
+          headers:
+            Set-Cookie:
+              description: Cookie HttpOnly `KALPEE_SESSION` (durée 24h)
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UtilisateurDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          $ref: '#/components/responses/EmailAlreadyUsedError'
+
+  /api/auth/login:
+    post:
+      tags: [Authentification]
+      summary: Se connecter avec email et mot de passe (F02)
+      security:
+        - csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authentification réussie
+          headers:
+            Set-Cookie:
+              description: Cookie HttpOnly `KALPEE_SESSION` (durée 24h)
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UtilisateurDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthenticatedError'
+        '429':
+          $ref: '#/components/responses/TooManyAttemptsError'
+
+  /api/auth/logout:
+    post:
+      tags: [Authentification]
+      summary: Se déconnecter et supprimer le cookie de session
+      responses:
+        '204':
+          description: Déconnexion effectuée (cookie `KALPEE_SESSION` expiré)
+
+  /api/auth/me:
+    get:
+      tags: [Authentification]
+      summary: Récupérer l'utilisateur actuellement connecté
+      responses:
+        '200':
+          description: Informations de l'utilisateur connecté
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UtilisateurDto'
+        '401':
+          $ref: '#/components/responses/UnauthenticatedError'
+
+  /api/oauth2/authorization/google:
+    get:
+      tags: [Authentification]
+      summary: Démarrer le flux d'authentification OAuth2 Google (PKCE + state)
+      security: []
+      responses:
+        '302':
+          description: Redirection vers l'écran de consentement Google OAuth2
+
+  /api/profil:
+    get:
+      tags: [Profil]
+      summary: Consulter son profil utilisateur (F03)
+      responses:
+        '200':
+          description: Profil de l'utilisateur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UtilisateurDto'
+        '401':
+          $ref: '#/components/responses/UnauthenticatedError'
+    put:
+      tags: [Profil]
+      summary: Modifier ses informations personnelles (nom, prénom, email) (F03)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfilRequest'
+      responses:
+        '200':
+          description: Profil mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UtilisateurDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthenticatedError'
+        '409':
+          $ref: '#/components/responses/EmailAlreadyUsedError'
+
+  /api/profil/mot-de-passe:
+    put:
+      tags: [Profil]
+      summary: Modifier ou définir son mot de passe (F03, D13, RB16)
+      description: |
+        Si `aMotDePasse` vaut `true`, `motDePasseActuel` est obligatoire.
+        Si le compte a été créé via Google ou lié à Google (`aMotDePasse == false`), `motDePasseActuel` est optionnel et permet de définir un mot de passe initial.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePasswordRequest'
+      responses:
+        '200':
+          description: Mot de passe mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UtilisateurDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthenticatedError'
+
+  /api/achats:
+    get:
+      tags: [Achats]
+      summary: Lister les achats de l'utilisateur avec filtres (F07)
+      parameters:
+        - name: recherche
+          in: query
+          required: false
+          description: Terme à rechercher dans le nom ou la description de l'achat
+          schema:
+            type: string
+        - name: priorite
+          in: query
+          required: false
+          description: Filtrer par niveau de priorité
+          schema:
+            $ref: '#/components/schemas/Priorite'
+      responses:
+        '200':
+          description: Liste des achats avec totaux, progression et statut déduit
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AchatDto'
+        '401':
+          $ref: '#/components/responses/UnauthenticatedError'
+    post:
+      tags: [Achats]
+      summary: Créer un nouvel achat (F04)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AchatRequest'
+      responses:
+        '201':
+          description: Achat créé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AchatDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthenticatedError'
+
+  /api/achats/{id}:
+    parameters:
+      - $ref: '#/components/parameters/ResourceId'
+    get:
+      tags: [Achats]
+      summary: Consulter le détail d'un achat et ses articles (F07)
+      responses:
+        '200':
+          description: Détail complet de l'achat avec la liste de ses articles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AchatDetailDto'
+        '401':
+          $ref: '#/components/responses/UnauthenticatedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    put:
+      tags: [Achats]
+      summary: Modifier un achat existant (F05)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AchatRequest'
+      responses:
+        '200':
+          description: Achat mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AchatDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthenticatedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    delete:
+      tags: [Achats]
+      summary: Supprimer un achat, ses articles et leurs fichiers photos (F06)
+      responses:
+        '204':
+          description: Achat supprimé
+        '401':
+          $ref: '#/components/responses/UnauthenticatedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /api/achats/{achatId}/articles:
+    parameters:
+      - name: achatId
+        in: path
+        required: true
+        description: Identifiant de l'achat parent
+        schema:
+          type: integer
+          format: int64
+    get:
+      tags: [Articles]
+      summary: Lister les articles d'un achat (F07)
+      responses:
+        '200':
+          description: Liste des articles de l'achat
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ArticleDto'
+        '401':
+          $ref: '#/components/responses/UnauthenticatedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    post:
+      tags: [Articles]
+      summary: Ajouter un article à un achat (F08)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArticleRequest'
+      responses:
+        '201':
+          description: Article créé avec son coût total calculé (F09)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArticleDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthenticatedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /api/articles/{id}:
+    parameters:
+      - $ref: '#/components/parameters/ResourceId'
+    put:
+      tags: [Articles]
+      summary: Modifier un article (F08)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArticleRequest'
+      responses:
+        '200':
+          description: Article mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArticleDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthenticatedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    delete:
+      tags: [Articles]
+      summary: Supprimer un article et sa photo éventuelle (F08)
+      responses:
+        '204':
+          description: Article supprimé
+        '401':
+          $ref: '#/components/responses/UnauthenticatedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /api/articles/{id}/statut:
+    parameters:
+      - $ref: '#/components/parameters/ResourceId'
+    patch:
+      tags: [Articles]
+      summary: Changer le statut d'un article et obtenir une proposition de retrait si ACHETE (F11, D3)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateStatutArticleRequest'
+      responses:
+        '200':
+          description: Statut mis à jour (inclut `retraitSuggere` non nul lorsque le nouveau statut est `ACHETE`)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArticleStatutResponseDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthenticatedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /api/articles/{id}/photo:
+    parameters:
+      - $ref: '#/components/parameters/ResourceId'
+    post:
+      tags: [Articles]
+      summary: Téléverser ou remplacer la photo d'un article (JPEG, PNG, WebP, max 5 Mo)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Fichier image (JPEG, PNG ou WebP, <= 5 Mo)
+      responses:
+        '200':
+          description: Photo enregistrée et article mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArticleDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthenticatedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    get:
+      tags: [Articles]
+      summary: Récupérer le flux binaire de la photo d'un article
+      responses:
+        '200':
+          description: Contenu binaire de l'image
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/webp:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: '#/components/responses/UnauthenticatedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    delete:
+      tags: [Articles]
+      summary: Supprimer la photo associée à un article
+      responses:
+        '204':
+          description: Photo supprimée
+        '401':
+          $ref: '#/components/responses/UnauthenticatedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /api/tirelire:
+    get:
+      tags: [Tirelire]
+      summary: Consulter le solde, le total déposé et le total retiré de la tirelire (F12)
+      responses:
+        '200':
+          description: État de la tirelire calculé à la lecture
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TirelireDto'
+        '401':
+          $ref: '#/components/responses/UnauthenticatedError'
+
+  /api/tirelire/depot:
+    post:
+      tags: [Tirelire]
+      summary: Effectuer un dépôt dans la tirelire (F13)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DepotRequest'
+      responses:
+        '201':
+          description: Dépôt enregistré
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthenticatedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /api/tirelire/retrait:
+    post:
+      tags: [Tirelire]
+      summary: Effectuer un retrait depuis la tirelire (F14, RB12, RB13)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RetraitRequest'
+      responses:
+        '201':
+          description: Retrait enregistré
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthenticatedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '422':
+          description: Solde global insuffisant (`INSUFFICIENT_BALANCE`) ou montant épargné de l'objectif insuffisant (`OBJECTIVE_INSUFFICIENT`)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/tirelire/transactions:
+    get:
+      tags: [Tirelire]
+      summary: Consulter l'historique paginé des transactions (F15)
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: Page de transactions (plus récentes d'abord)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionPageDto'
+        '401':
+          $ref: '#/components/responses/UnauthenticatedError'
+
+  /api/objectifs:
+    get:
+      tags: [Objectifs]
+      summary: Lister tous les objectifs d'épargne de l'utilisateur (F17, F18)
+      responses:
+        '200':
+          description: Liste des objectifs avec progression et épargne mensuelle recommandée
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ObjectifDto'
+        '401':
+          $ref: '#/components/responses/UnauthenticatedError'
+    post:
+      tags: [Objectifs]
+      summary: Créer un objectif d'épargne (F16)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ObjectifRequest'
+      responses:
+        '201':
+          description: Objectif d'épargne créé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectifDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthenticatedError'
+
+  /api/objectifs/{id}:
+    parameters:
+      - $ref: '#/components/parameters/ResourceId'
+    get:
+      tags: [Objectifs]
+      summary: Consulter le détail d'un objectif d'épargne (F17, F18)
+      responses:
+        '200':
+          description: Détail de l'objectif
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectifDto'
+        '401':
+          $ref: '#/components/responses/UnauthenticatedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    put:
+      tags: [Objectifs]
+      summary: Modifier un objectif d'épargne (F16)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ObjectifRequest'
+      responses:
+        '200':
+          description: Objectif mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectifDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthenticatedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    delete:
+      tags: [Objectifs]
+      summary: Supprimer un objectif d'épargne
+      responses:
+        '204':
+          description: Objectif supprimé (les transactions liées sont conservées avec `objectifId = null`)
+        '401':
+          $ref: '#/components/responses/UnauthenticatedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /api/dashboard:
+    get:
+      tags: [Dashboard]
+      summary: Récupérer toutes les indicateurs du tableau de bord en un seul appel
+      responses:
+        '200':
+          description: Agrégats complets du dashboard
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardDto'
+        '401':
+          $ref: '#/components/responses/UnauthenticatedError'
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: KALPEE_SESSION
+      description: Jeton JWT signé stocké dans un cookie HttpOnly (SameSite=Lax, durée 24h).
+    csrfToken:
+      type: apiKey
+      in: header
+      name: X-XSRF-TOKEN
+      description: Jeton anti-CSRF lu depuis le cookie `XSRF-TOKEN`.
+
+  parameters:
+    ResourceId:
+      name: id
+      in: path
+      required: true
+      description: Identifiant numérique de la ressource
+      schema:
+        type: integer
+        format: int64
+
+  responses:
+    ValidationError:
+      description: Données de requête invalides (`VALIDATION_ERROR`)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    UnauthenticatedError:
+      description: Utilisateur non authentifié ou identifiants invalides (`UNAUTHENTICATED`)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFoundError:
+      description: Ressource introuvable ou appartenant à un autre utilisateur (`NOT_FOUND`)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    EmailAlreadyUsedError:
+      description: Adresse email déjà utilisée par un autre compte (`EMAIL_ALREADY_USED`)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    TooManyAttemptsError:
+      description: Trop de tentatives de connexion échouées (`TOO_MANY_ATTEMPTS`)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    Priorite:
+      type: string
+      enum: [URGENT, IMPORTANT, NORMAL, FAIBLE]
+    Categorie:
+      type: string
+      enum: [VETEMENTS, ELECTRONIQUE, ACCESSOIRES, EQUIPEMENT, AUTRE]
+    StatutAchat:
+      type: string
+      enum: [A_PLANIFIER, EN_COURS, TERMINE]
+    StatutArticle:
+      type: string
+      enum: [A_ACHETER, MIS_DE_COTE, ACHETE]
+    TypeTransaction:
+      type: string
+      enum: [DEPOT, RETRAIT]
+
+    ErrorResponse:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum:
+            - VALIDATION_ERROR
+            - UNAUTHENTICATED
+            - NOT_FOUND
+            - EMAIL_ALREADY_USED
+            - INSUFFICIENT_BALANCE
+            - OBJECTIVE_INSUFFICIENT
+            - TOO_MANY_ATTEMPTS
+          example: VALIDATION_ERROR
+        message:
+          type: string
+          example: Les données saisies sont invalides.
+        details:
+          type: object
+          additionalProperties:
+            type: string
+          nullable: true
+          example:
+            nom: Le nom est obligatoire
+
+    RegisterRequest:
+      type: object
+      required: [nom, prenom, email, motDePasse]
+      properties:
+        nom:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: Diarizo
+        prenom:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: Ouz
+        email:
+          type: string
+          format: email
+          example: ouz@example.com
+        motDePasse:
+          type: string
+          minLength: 8
+          example: motdepasse123
+
+    LoginRequest:
+      type: object
+      required: [email, motDePasse]
+      properties:
+        email:
+          type: string
+          format: email
+          example: ouz@example.com
+        motDePasse:
+          type: string
+          example: motdepasse123
+
+    UpdateProfilRequest:
+      type: object
+      required: [nom, prenom, email]
+      properties:
+        nom:
+          type: string
+          example: Diarizo
+        prenom:
+          type: string
+          example: Ouz
+        email:
+          type: string
+          format: email
+          example: ouz@example.com
+
+    UpdatePasswordRequest:
+      type: object
+      required: [nouveauMotDePasse]
+      properties:
+        motDePasseActuel:
+          type: string
+          nullable: true
+          example: ancien123
+        nouveauMotDePasse:
+          type: string
+          minLength: 8
+          example: nouveau123
+
+    UtilisateurDto:
+      type: object
+      required:
+        - id
+        - nom
+        - prenom
+        - email
+        - aMotDePasse
+        - connexionGoogle
+        - motDePasseSupprimeParLiaisonGoogle
+        - dateCreation
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        nom:
+          type: string
+          example: Diarizo
+        prenom:
+          type: string
+          example: Ouz
+        email:
+          type: string
+          format: email
+          example: ouz@example.com
+        aMotDePasse:
+          type: boolean
+          example: true
+        connexionGoogle:
+          type: boolean
+          example: false
+        motDePasseSupprimeParLiaisonGoogle:
+          type: boolean
+          example: false
+        dateCreation:
+          type: string
+          format: date-time
+          example: '2026-10-22T21:00:00Z'
+
+    AchatRequest:
+      type: object
+      required: [nom, priorite, categorie]
+      properties:
+        nom:
+          type: string
+          minLength: 1
+          maxLength: 150
+          example: Habits
+        description:
+          type: string
+          nullable: true
+          example: Vêtements pour les vacances
+        priorite:
+          $ref: '#/components/schemas/Priorite'
+        categorie:
+          $ref: '#/components/schemas/Categorie'
+        dateLimite:
+          type: string
+          format: date
+          nullable: true
+          example: '2026-09-15'
+
+    AchatDto:
+      type: object
+      required:
+        - id
+        - nom
+        - priorite
+        - categorie
+        - statut
+        - nombreArticles
+        - nombreArticlesAchetes
+        - total
+        - dejaAchete
+        - resteAAcheter
+        - progression
+        - dateCreation
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        nom:
+          type: string
+          example: Habits
+        description:
+          type: string
+          nullable: true
+          example: Vêtements pour les vacances
+        priorite:
+          $ref: '#/components/schemas/Priorite'
+        categorie:
+          $ref: '#/components/schemas/Categorie'
+        dateLimite:
+          type: string
+          format: date
+          nullable: true
+          example: '2026-09-15'
+        statut:
+          $ref: '#/components/schemas/StatutAchat'
+        nombreArticles:
+          type: integer
+          example: 2
+        nombreArticlesAchetes:
+          type: integer
+          example: 1
+        total:
+          type: integer
+          format: int64
+          description: Montant total en FCFA
+          example: 45000
+        dejaAchete:
+          type: integer
+          format: int64
+          description: Montant déjà acheté en FCFA
+          example: 30000
+        resteAAcheter:
+          type: integer
+          format: int64
+          description: Montant restant à acheter en FCFA
+          example: 15000
+        progression:
+          type: integer
+          minimum: 0
+          maximum: 100
+          example: 67
+        dateCreation:
+          type: string
+          format: date-time
+          example: '2026-10-22T21:00:00Z'
+
+    AchatDetailDto:
+      allOf:
+        - $ref: '#/components/schemas/AchatDto'
+        - type: object
+          required: [articles]
+          properties:
+            articles:
+              type: array
+              items:
+                $ref: '#/components/schemas/ArticleDto'
+
+    ArticleRequest:
+      type: object
+      required: [nom, quantite, prixUnitaire]
+      properties:
+        nom:
+          type: string
+          minLength: 1
+          maxLength: 150
+          example: Jean noir
+        description:
+          type: string
+          nullable: true
+          example: Jean noir coupe droite
+        quantite:
+          type: integer
+          minimum: 1
+          example: 2
+        prixUnitaire:
+          type: integer
+          format: int64
+          minimum: 0
+          example: 15000
+        magasin:
+          type: string
+          nullable: true
+          example: Zara
+        statut:
+          $ref: '#/components/schemas/StatutArticle'
+
+    ArticleDto:
+      type: object
+      required:
+        - id
+        - achatId
+        - nom
+        - quantite
+        - prixUnitaire
+        - total
+        - statut
+        - aPhoto
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        achatId:
+          type: integer
+          format: int64
+          example: 1
+        nom:
+          type: string
+          example: Jean noir
+        description:
+          type: string
+          nullable: true
+          example: Jean noir coupe droite
+        quantite:
+          type: integer
+          example: 2
+        prixUnitaire:
+          type: integer
+          format: int64
+          example: 15000
+        total:
+          type: integer
+          format: int64
+          example: 30000
+        magasin:
+          type: string
+          nullable: true
+          example: Zara
+        statut:
+          $ref: '#/components/schemas/StatutArticle'
+        aPhoto:
+          type: boolean
+          example: true
+        photoUrl:
+          type: string
+          nullable: true
+          example: /api/articles/10/photo
+
+    UpdateStatutArticleRequest:
+      type: object
+      required: [statut]
+      properties:
+        statut:
+          $ref: '#/components/schemas/StatutArticle'
+
+    RetraitSuggereDto:
+      type: object
+      required: [montant, motif, articleId]
+      properties:
+        montant:
+          type: integer
+          format: int64
+          example: 30000
+        motif:
+          type: string
+          example: 'Achat : Jean noir (Habits)'
+        articleId:
+          type: integer
+          format: int64
+          example: 10
+
+    ArticleStatutResponseDto:
+      type: object
+      required: [article]
+      properties:
+        article:
+          $ref: '#/components/schemas/ArticleDto'
+        retraitSuggere:
+          $ref: '#/components/schemas/RetraitSuggereDto'
+          nullable: true
+
+    TirelireDto:
+      type: object
+      required: [solde, totalDepose, totalRetire]
+      properties:
+        solde:
+          type: integer
+          format: int64
+          example: 150000
+        totalDepose:
+          type: integer
+          format: int64
+          example: 180000
+        totalRetire:
+          type: integer
+          format: int64
+          example: 30000
+
+    DepotRequest:
+      type: object
+      required: [montant, motif]
+      properties:
+        montant:
+          type: integer
+          format: int64
+          minimum: 1
+          example: 25000
+        motif:
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: Épargne mensuelle
+        objectifId:
+          type: integer
+          format: int64
+          nullable: true
+          example: 1
+
+    RetraitRequest:
+      type: object
+      required: [montant, motif]
+      properties:
+        montant:
+          type: integer
+          format: int64
+          minimum: 1
+          example: 30000
+        motif:
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: 'Achat : Jean noir'
+        objectifId:
+          type: integer
+          format: int64
+          nullable: true
+          example: null
+        articleId:
+          type: integer
+          format: int64
+          nullable: true
+          example: 10
+
+    TransactionDto:
+      type: object
+      required: [id, type, montant, motif, date]
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        type:
+          $ref: '#/components/schemas/TypeTransaction'
+        montant:
+          type: integer
+          format: int64
+          example: 25000
+        motif:
+          type: string
+          example: Épargne mensuelle
+        date:
+          type: string
+          format: date-time
+          example: '2026-10-22T21:00:00Z'
+        objectifId:
+          type: integer
+          format: int64
+          nullable: true
+          example: 1
+        objectifNom:
+          type: string
+          nullable: true
+          example: Acheter mon ordinateur
+        articleId:
+          type: integer
+          format: int64
+          nullable: true
+          example: null
+        articleNom:
+          type: string
+          nullable: true
+          example: null
+
+    TransactionPageDto:
+      type: object
+      required: [content, page, size, totalElements, totalPages, hasNext]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionDto'
+        page:
+          type: integer
+          example: 0
+        size:
+          type: integer
+          example: 20
+        totalElements:
+          type: integer
+          format: int64
+          example: 1
+        totalPages:
+          type: integer
+          example: 1
+        hasNext:
+          type: boolean
+          example: false
+
+    ObjectifRequest:
+      type: object
+      required: [nom, montantCible, dateCible, categorie]
+      properties:
+        nom:
+          type: string
+          minLength: 1
+          maxLength: 150
+          example: Acheter mon ordinateur
+        description:
+          type: string
+          nullable: true
+          example: Un bon PC pour le travail
+        montantCible:
+          type: integer
+          format: int64
+          minimum: 1
+          example: 300000
+        montantInitial:
+          type: integer
+          format: int64
+          minimum: 0
+          default: 0
+          example: 150000
+        dateCible:
+          type: string
+          format: date
+          example: '2026-11-30'
+        categorie:
+          $ref: '#/components/schemas/Categorie'
+
+    ObjectifDto:
+      type: object
+      required:
+        - id
+        - nom
+        - montantCible
+        - montantInitial
+        - montantEpargne
+        - reste
+        - progression
+        - dateCible
+        - categorie
+        - atteint
+        - dateCreation
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        nom:
+          type: string
+          example: Acheter mon ordinateur
+        description:
+          type: string
+          nullable: true
+          example: Un bon PC pour le travail
+        montantCible:
+          type: integer
+          format: int64
+          example: 300000
+        montantInitial:
+          type: integer
+          format: int64
+          example: 150000
+        montantEpargne:
+          type: integer
+          format: int64
+          example: 175000
+        reste:
+          type: integer
+          format: int64
+          example: 125000
+        progression:
+          type: integer
+          minimum: 0
+          maximum: 100
+          example: 58
+        dateCible:
+          type: string
+          format: date
+          example: '2026-11-30'
+        categorie:
+          $ref: '#/components/schemas/Categorie'
+        epargneMensuelleRecommandee:
+          type: integer
+          format: int64
+          nullable: true
+          example: 62500
+        moisRestants:
+          type: integer
+          nullable: true
+          example: 2
+        atteint:
+          type: boolean
+          example: false
+        dateCreation:
+          type: string
+          format: date-time
+          example: '2026-10-22T21:00:00Z'
+
+    DashboardDto:
+      type: object
+      required:
+        - solde
+        - totalDepose
+        - totalRetire
+        - nombreAchats
+        - totalPrevu
+        - dejaAchete
+        - resteAFinancer
+        - progressionAchats
+        - achatsParPriorite
+        - nombreObjectifsEnCours
+        - achatsPrioritaires
+      properties:
+        solde:
+          type: integer
+          format: int64
+          example: 150000
+        totalDepose:
+          type: integer
+          format: int64
+          example: 180000
+        totalRetire:
+          type: integer
+          format: int64
+          example: 30000
+        nombreAchats:
+          type: integer
+          example: 4
+        totalPrevu:
+          type: integer
+          format: int64
+          example: 520000
+        dejaAchete:
+          type: integer
+          format: int64
+          example: 150000
+        resteAFinancer:
+          type: integer
+          format: int64
+          example: 370000
+        progressionAchats:
+          type: integer
+          minimum: 0
+          maximum: 100
+          example: 29
+        achatsParPriorite:
+          type: object
+          additionalProperties:
+            type: integer
+          example:
+            URGENT: 1
+            IMPORTANT: 1
+            NORMAL: 1
+            FAIBLE: 1
+        nombreObjectifsEnCours:
+          type: integer
+          example: 2
+        objectifPrincipal:
+          $ref: '#/components/schemas/ObjectifDto'
+          nullable: true
+        achatsPrioritaires:
+          type: array
+          items:
+            $ref: '#/components/schemas/AchatDto'

@@ -1,0 +1,24 @@
+# Backend (Maven / Java)
+backend/target/
+backend/.mvn/
+*.class
+*.log
+*.jar
+*.war
+*.ear
+backend/uploads/
+
+# Frontend (Node / Vite)
+frontend/node_modules/
+frontend/dist/
+frontend/coverage/
+.vite/
+
+# Environment & IDE
+.env
+.env.local
+.env.*.local
+.idea/
+.vscode/
+*.iml
+.DS_Store
