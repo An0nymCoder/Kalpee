@@ -6,7 +6,7 @@ spring:
   application:
     name: kalpee-backend
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/kalpee}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/kalpee}
     username: ${SPRING_DATASOURCE_USERNAME:kalpee}
     password: ${SPRING_DATASOURCE_PASSWORD:kalpee_secret}
     driver-class-name: org.postgresql.Driver
