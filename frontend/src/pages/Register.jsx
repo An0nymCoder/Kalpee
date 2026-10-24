@@ -51,23 +51,29 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F7F1E8] flex flex-col justify-center items-center px-4 py-10">
-      <div className="w-full max-w-md">
+    <div className="relative min-h-screen bg-[#F7F1E8] flex flex-col justify-center items-center px-4 py-10 overflow-hidden">
+      {/* Halos décoratifs chaleureux (couleurs Kalpee) */}
+      <div className="pointer-events-none absolute -top-24 -right-20 w-80 h-80 rounded-full bg-[#E8D8C3]/65 blur-3xl animate-pulse-slow" />
+      <div className="pointer-events-none absolute -bottom-24 -left-20 w-96 h-96 rounded-full bg-[#C58B45]/15 blur-3xl animate-float-slow" />
+
+      <div className="relative z-10 w-full max-w-md animate-fade-up">
         <div className="flex flex-col items-center text-center mb-8">
-          <div className="w-12 h-12 rounded-full bg-[#2A1B12] text-[#FFFDF9] flex items-center justify-center font-serif text-2xl mb-3 shadow-sm">
+          <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#2A1B12] via-[#3E2723] to-[#6B4226] text-[#FFFDF9] flex items-center justify-center font-serif text-2xl mb-3.5 shadow-[0_8px_24px_rgba(42,27,18,0.22)] ring-4 ring-[#E8D8C3]/60 transition-transform duration-300 hover:scale-105">
             K
           </div>
-          <h1 className="font-serif text-3xl text-[#332821]">Créer ton compte Kalpee</h1>
+          <h1 className="font-serif text-3xl sm:text-4xl text-[#332821] tracking-tight">
+            Créer ton compte Kalpee
+          </h1>
           <p className="text-sm text-[#806F62] mt-1.5">
             Organise tes envies d&apos;achat et mets de l&apos;argent de côté à ton rythme.
           </p>
         </div>
 
-        <div className="bg-[#FFFDF9] rounded-[28px] border border-[#E8D8C3] shadow-soft p-6 sm:p-8">
+        <div className="bg-[#FFFDF9]/95 backdrop-blur-sm rounded-[28px] border border-[#E8D8C3] shadow-[0_12px_40px_-8px_rgba(107,66,38,0.12)] p-6 sm:p-8">
           {serverError && (
             <div
               role="alert"
-              className="mb-5 flex items-start gap-2.5 p-3.5 rounded-2xl bg-[#FDF4F3] border border-[#A65D57]/40 text-xs font-medium text-[#A65D57]"
+              className="mb-5 flex items-start gap-2.5 p-3.5 rounded-2xl bg-[#FDF4F3] border border-[#A65D57]/40 text-xs font-medium text-[#A65D57] animate-fade-up"
             >
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
               <span>{serverError}</span>
@@ -78,7 +84,7 @@ export default function Register() {
           <button
             type="button"
             onClick={handleGoogleLogin}
-            className="w-full py-3.5 px-4 rounded-full bg-[#F7F1E8] hover:bg-[#F1E6D6] border border-[#E8D8C3] text-[#332821] font-medium text-sm flex items-center justify-center gap-3 transition-colors"
+            className="w-full py-3.5 px-4 rounded-full bg-[#F7F1E8] hover:bg-[#F1E6D6] border border-[#E8D8C3] hover:border-[#8B6245]/50 text-[#332821] font-medium text-sm flex items-center justify-center gap-3 shadow-sm hover:shadow hover:-translate-y-0.5 active:scale-[0.99] transition-all duration-200"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" aria-hidden="true">
               <path
@@ -120,7 +126,7 @@ export default function Register() {
                   type="text"
                   placeholder="Ouz"
                   {...register('prenom')}
-                  className="w-full px-4 py-3 rounded-2xl bg-[#F7F1E8] border border-[#E8D8C3] focus:border-[#6B4226] focus:outline-none text-sm text-[#332821] placeholder:text-[#806F62]/70"
+                  className="w-full px-4 py-3 rounded-2xl bg-[#F7F1E8] border border-[#E8D8C3] focus:border-[#6B4226] focus:ring-2 focus:ring-[#6B4226]/15 focus:bg-[#FFFDF9] focus:outline-none text-sm text-[#332821] placeholder:text-[#806F62]/70 transition-all duration-200"
                 />
                 {errors.prenom && (
                   <p className="mt-1 text-xs text-[#A65D57]">{errors.prenom.message}</p>
@@ -136,7 +142,7 @@ export default function Register() {
                   type="text"
                   placeholder="Diarizo"
                   {...register('nom')}
-                  className="w-full px-4 py-3 rounded-2xl bg-[#F7F1E8] border border-[#E8D8C3] focus:border-[#6B4226] focus:outline-none text-sm text-[#332821] placeholder:text-[#806F62]/70"
+                  className="w-full px-4 py-3 rounded-2xl bg-[#F7F1E8] border border-[#E8D8C3] focus:border-[#6B4226] focus:ring-2 focus:ring-[#6B4226]/15 focus:bg-[#FFFDF9] focus:outline-none text-sm text-[#332821] placeholder:text-[#806F62]/70 transition-all duration-200"
                 />
                 {errors.nom && (
                   <p className="mt-1 text-xs text-[#A65D57]">{errors.nom.message}</p>
@@ -154,7 +160,7 @@ export default function Register() {
                 autoComplete="email"
                 placeholder="ouz@example.com"
                 {...register('email')}
-                className="w-full px-4 py-3 rounded-2xl bg-[#F7F1E8] border border-[#E8D8C3] focus:border-[#6B4226] focus:outline-none text-sm text-[#332821] placeholder:text-[#806F62]/70"
+                className="w-full px-4 py-3 rounded-2xl bg-[#F7F1E8] border border-[#E8D8C3] focus:border-[#6B4226] focus:ring-2 focus:ring-[#6B4226]/15 focus:bg-[#FFFDF9] focus:outline-none text-sm text-[#332821] placeholder:text-[#806F62]/70 transition-all duration-200"
               />
               {errors.email && (
                 <p className="mt-1 text-xs text-[#A65D57]">{errors.email.message}</p>
@@ -171,7 +177,7 @@ export default function Register() {
                 autoComplete="new-password"
                 placeholder="8 caractères minimum"
                 {...register('motDePasse')}
-                className="w-full px-4 py-3 rounded-2xl bg-[#F7F1E8] border border-[#E8D8C3] focus:border-[#6B4226] focus:outline-none text-sm text-[#332821] placeholder:text-[#806F62]/70"
+                className="w-full px-4 py-3 rounded-2xl bg-[#F7F1E8] border border-[#E8D8C3] focus:border-[#6B4226] focus:ring-2 focus:ring-[#6B4226]/15 focus:bg-[#FFFDF9] focus:outline-none text-sm text-[#332821] placeholder:text-[#806F62]/70 transition-all duration-200"
               />
               {errors.motDePasse && (
                 <p className="mt-1 text-xs text-[#A65D57]">{errors.motDePasse.message}</p>
@@ -181,7 +187,7 @@ export default function Register() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3.5 px-5 rounded-full bg-[#6B4226] hover:bg-[#58351D] text-[#FFFDF9] font-medium text-sm transition-colors disabled:opacity-60 mt-2"
+              className="w-full py-3.5 px-5 rounded-full bg-gradient-to-r from-[#6B4226] via-[#58351D] to-[#3E2723] hover:from-[#58351D] hover:to-[#2A1B12] text-[#FFFDF9] font-medium text-sm shadow-[0_6px_20px_rgba(107,66,38,0.28)] hover:shadow-[0_10px_25px_rgba(107,66,38,0.38)] hover:-translate-y-0.5 active:scale-[0.99] transition-all duration-200 disabled:opacity-60 mt-2"
             >
               {isSubmitting ? 'Création en cours...' : "S'inscrire"}
             </button>
@@ -189,7 +195,7 @@ export default function Register() {
 
           <p className="text-center text-sm text-[#806F62] mt-6">
             Déjà un compte ?{' '}
-            <Link to="/login" className="font-semibold text-[#6B4226] hover:underline">
+            <Link to="/login" className="font-semibold text-[#6B4226] hover:text-[#3E2723] hover:underline transition-colors">
               Se connecter
             </Link>
           </p>

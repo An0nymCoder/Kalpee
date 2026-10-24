@@ -18,10 +18,10 @@ export default function AchatCard({ achat }) {
   return (
     <Link
       to={`/achats/${achat.id}`}
-      className="group block bg-[#FFFDF9] rounded-[24px] border border-[#E8D8C3]/90 p-5 shadow-card hover:shadow-soft hover:border-[#6B4226]/40 transition-all"
+      className="group block bg-[#FFFDF9] rounded-[24px] border border-[#E8D8C3]/90 p-5 shadow-card hover:shadow-[0_14px_32px_-8px_rgba(107,66,38,0.14)] hover:border-[#8B6245]/50 hover:-translate-y-1 transition-all duration-300"
     >
       <div className="flex items-start justify-between gap-3 mb-4">
-        <div className="w-11 h-11 rounded-full bg-[#F1E6D6] text-[#332821] flex items-center justify-center shrink-0 group-hover:bg-[#E8D8C3] transition-colors">
+        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-[#F1E6D6] to-[#E8D8C3]/80 text-[#332821] flex items-center justify-center shrink-0 group-hover:from-[#6B4226] group-hover:to-[#3E2723] group-hover:text-[#FFFDF9] transition-all duration-300 shadow-sm">
           <CategoryIcon categorie={achat.categorie} className="w-5 h-5" />
         </div>
 
@@ -72,7 +72,7 @@ export default function AchatCard({ achat }) {
         </div>
         <div className="w-full h-2 rounded-full bg-[#EFE6D8] overflow-hidden">
           <div
-            className="h-full rounded-full bg-[#6B4226] transition-all duration-300"
+            className="h-full rounded-full bg-gradient-to-r from-[#6B4226] via-[#8B6245] to-[#C58B45] transition-all duration-500"
             style={{ width: `${progression}%` }}
           />
         </div>

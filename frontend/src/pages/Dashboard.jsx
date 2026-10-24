@@ -112,7 +112,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-8">
       {/* En-tête */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 animate-fade-up">
         <div>
           <p className="text-sm text-[#806F62] mb-1">
             Bonjour {user?.prenom || 'toi'} 👋
@@ -124,7 +124,7 @@ export default function Dashboard() {
         <button
           type="button"
           onClick={() => setIsAchatModalOpen(true)}
-          className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-[#6B4226] hover:bg-[#58351D] text-[#FFFDF9] text-sm font-medium shadow-sm transition-colors self-start sm:self-auto"
+          className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-gradient-to-r from-[#6B4226] via-[#58351D] to-[#3E2723] hover:from-[#58351D] hover:to-[#2A1B12] text-[#FFFDF9] text-sm font-medium shadow-[0_6px_18px_rgba(107,66,38,0.25)] hover:shadow-[0_10px_24px_rgba(107,66,38,0.35)] hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
           <span>Nouvel achat</span>
@@ -132,18 +132,18 @@ export default function Dashboard() {
       </div>
 
       {/* Grande carte marron : Ma tirelire disponible */}
-      <div className="relative overflow-hidden rounded-[28px] bg-[#6B4226] text-[#FFFDF9] p-6 sm:p-8 shadow-soft">
-        <div className="pointer-events-none absolute -right-12 -top-12 w-56 h-56 rounded-full bg-[#8B6245]/30" />
-        <div className="pointer-events-none absolute -left-16 -bottom-20 w-64 h-64 rounded-full bg-[#3E2723]/25" />
+      <div className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-[#3E2723] via-[#6B4226] to-[#8B6245] text-[#FFFDF9] p-6 sm:p-8 shadow-[0_16px_40px_-8px_rgba(62,39,35,0.32)] border border-[#FFFDF9]/15 animate-fade-up-delay-1">
+        <div className="pointer-events-none absolute -right-12 -top-12 w-60 h-60 rounded-full bg-[#C58B45]/25 blur-2xl animate-pulse-slow" />
+        <div className="pointer-events-none absolute -left-16 -bottom-20 w-72 h-72 rounded-full bg-[#2A1B12]/40 blur-2xl animate-float-slow" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FFFDF9]/15 text-xs font-medium text-[#F1E6D6] mb-4">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FFFDF9]/15 backdrop-blur-sm border border-[#FFFDF9]/15 text-xs font-medium text-[#F1E6D6] mb-4">
               <PiggyBank className="w-3.5 h-3.5" />
               <span>Ma tirelire disponible</span>
             </div>
 
-            <p className="font-serif text-4xl sm:text-5xl tracking-tight">
+            <p className="font-serif text-4xl sm:text-5xl tracking-tight drop-shadow-sm">
               {formatMontant(solde)}
             </p>
 
@@ -156,7 +156,7 @@ export default function Dashboard() {
             <button
               type="button"
               onClick={() => setTxModalType('DEPOT')}
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-[#FFFDF9] hover:bg-[#F1E6D6] text-[#332821] text-sm font-medium transition-colors"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-[#FFFDF9] hover:bg-[#F1E6D6] text-[#332821] text-sm font-medium shadow-md hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200"
             >
               <Plus className="w-4 h-4" />
               <span>Déposer</span>
@@ -164,7 +164,7 @@ export default function Dashboard() {
             <button
               type="button"
               onClick={() => setTxModalType('RETRAIT')}
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-full border border-[#FFFDF9]/35 hover:bg-[#FFFDF9]/10 text-[#FFFDF9] text-sm font-medium transition-colors"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-full border border-[#FFFDF9]/40 bg-[#FFFDF9]/5 hover:bg-[#FFFDF9]/15 text-[#FFFDF9] text-sm font-medium hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200"
             >
               <Minus className="w-4 h-4" />
               <span>Retirer</span>
@@ -174,9 +174,9 @@ export default function Dashboard() {
       </div>
 
       {/* Deux cartes : Budget des achats & Objectif d'épargne */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-up-delay-2">
         {/* Carte Budget des achats */}
-        <div className="bg-[#FFFDF9] rounded-[28px] border border-[#E8D8C3] p-6 flex flex-col justify-between shadow-card">
+        <div className="bg-[#FFFDF9] rounded-[28px] border border-[#E8D8C3] p-6 flex flex-col justify-between shadow-card hover:shadow-[0_14px_32px_-8px_rgba(107,66,38,0.12)] hover:border-[#8B6245]/45 transition-all duration-300">
           <div>
             <div className="flex items-center justify-between gap-2 mb-5">
               <div className="flex items-center gap-2.5 text-[#332821] font-medium">

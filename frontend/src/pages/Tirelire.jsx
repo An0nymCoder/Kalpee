@@ -93,16 +93,16 @@ export default function Tirelire() {
       </div>
 
       {/* Grande carte marron centrale */}
-      <div className="relative overflow-hidden rounded-[28px] bg-[#6B4226] text-[#FFFDF9] px-6 py-10 sm:py-12 text-center shadow-soft">
-        <div className="pointer-events-none absolute -right-12 -top-12 w-56 h-56 rounded-full bg-[#8B6245]/30" />
-        <div className="pointer-events-none absolute -left-16 -bottom-20 w-64 h-64 rounded-full bg-[#3E2723]/30" />
+      <div className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-[#3E2723] via-[#6B4226] to-[#8B6245] text-[#FFFDF9] px-6 py-10 sm:py-12 text-center shadow-[0_16px_40px_-8px_rgba(62,39,35,0.32)] border border-[#FFFDF9]/15 animate-fade-up-delay-1">
+        <div className="pointer-events-none absolute -right-12 -top-12 w-60 h-60 rounded-full bg-[#C58B45]/25 blur-2xl animate-pulse-slow" />
+        <div className="pointer-events-none absolute -left-16 -bottom-20 w-72 h-72 rounded-full bg-[#2A1B12]/40 blur-2xl animate-float-slow" />
 
         <div className="relative z-10 max-w-md mx-auto flex flex-col items-center">
-          <div className="w-14 h-14 rounded-full bg-[#FFFDF9]/15 flex items-center justify-center mb-4">
+          <div className="w-14 h-14 rounded-full bg-[#FFFDF9]/15 backdrop-blur-sm border border-[#FFFDF9]/20 flex items-center justify-center mb-4 shadow-md">
             <PiggyBank className="w-7 h-7 text-[#FFFDF9]" />
           </div>
 
-          <p className="font-serif text-4xl sm:text-5xl tracking-tight">
+          <p className="font-serif text-4xl sm:text-5xl tracking-tight drop-shadow-sm">
             {formatMontant(tirelire.solde)}
           </p>
           <p className="text-sm text-[#E8D8C3] mt-2">Argent disponible</p>
@@ -111,7 +111,7 @@ export default function Tirelire() {
             <button
               type="button"
               onClick={() => setModalType('DEPOT')}
-              className="min-w-[140px] inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-[#FFFDF9] hover:bg-[#F1E6D6] text-[#332821] text-sm font-medium transition-colors"
+              className="min-w-[140px] inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-[#FFFDF9] hover:bg-[#F1E6D6] text-[#332821] text-sm font-medium shadow-md hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200"
             >
               <Plus className="w-4 h-4" />
               <span>Ajouter</span>
@@ -120,7 +120,7 @@ export default function Tirelire() {
             <button
               type="button"
               onClick={() => setModalType('RETRAIT')}
-              className="min-w-[140px] inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full border border-[#FFFDF9]/35 hover:bg-[#FFFDF9]/10 text-[#FFFDF9] text-sm font-medium transition-colors"
+              className="min-w-[140px] inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full border border-[#FFFDF9]/40 bg-[#FFFDF9]/5 hover:bg-[#FFFDF9]/15 text-[#FFFDF9] text-sm font-medium hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200"
             >
               <Minus className="w-4 h-4" />
               <span>Retirer</span>
