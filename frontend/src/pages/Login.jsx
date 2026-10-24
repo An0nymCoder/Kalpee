@@ -29,8 +29,18 @@ export default function Login() {
     ? OAUTH_ERRORS[oauthErrorKey] || 'Une erreur est survenue lors de la connexion Google.'
     : ''
 
-  // Affiche la page de chargement dynamique Kalpee pendant ~2.6s avant la page de connexion
-  const [showSplash, setShowSplash] = useState(!oauthErrorKey)
+  // Affiche la page de chargement dynamique Kalpee une seule fois à l'ouverture avant la page de connexion
+  const [showSplash, setShowSplash] = useState(() => {
+    if (oauthErrorKey) return false
+    try {
+      const alreadySeen = sessionStorage.getItem('kalpee_splash_seen') === 'true'
+      if (alreadySeen) return false
+      sessionStorage.setItem('kalpee_splash_seen', 'true')
+      return true
+    } catch {
+      return true
+    }
+  })
 
   const {
     register,
