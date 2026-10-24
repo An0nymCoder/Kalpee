@@ -68,6 +68,12 @@ public class ArticleService {
     @Transactional
     public ArticleDto modifierArticle(Long utilisateurId, Long articleId, ArticleRequestDto dto) {
         Article article = getArticleOrThrow(utilisateurId, articleId);
+        if (article.getStatut() == StatutArticle.ACHETE) {
+            throw new KalpeeException(
+                    CodeErreur.VALIDATION_ERROR,
+                    "Cet article est déjà marqué comme acheté, son état ne peut plus être modifié."
+            );
+        }
         article.setNom(dto.nom().trim());
         article.setDescription(dto.description() != null ? dto.description().trim() : null);
         article.setQuantite(dto.quantite());
@@ -84,6 +90,12 @@ public class ArticleService {
     @Transactional
     public ArticleStatutResponseDto changerStatut(Long utilisateurId, Long articleId, StatutArticle nouveauStatut) {
         Article article = getArticleOrThrow(utilisateurId, articleId);
+        if (article.getStatut() == StatutArticle.ACHETE && nouveauStatut != StatutArticle.ACHETE) {
+            throw new KalpeeException(
+                    CodeErreur.VALIDATION_ERROR,
+                    "Cet article est déjà marqué comme acheté, son état ne peut plus être modifié."
+            );
+        }
         article.setStatut(nouveauStatut);
         Article saved = articleRepository.save(article);
         ArticleDto articleDto = mapper.toArticleDto(saved);

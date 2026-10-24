@@ -221,14 +221,16 @@ export default function AchatDetail() {
           </div>
 
           <div className="flex items-center gap-2.5 self-start">
-            <button
-              type="button"
-              onClick={() => setIsEditAchatOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#EFE6D8] hover:bg-[#E8D8C3] text-[#332821] text-xs font-semibold transition-colors"
-            >
-              <Pencil className="w-3.5 h-3.5" />
-              <span>Modifier</span>
-            </button>
+            {achat.statut !== 'TERMINE' && (
+              <button
+                type="button"
+                onClick={() => setIsEditAchatOpen(true)}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#EFE6D8] hover:bg-[#E8D8C3] text-[#332821] text-xs font-semibold transition-colors"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                <span>Modifier</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={() => setIsDeleteAchatOpen(true)}
@@ -385,36 +387,46 @@ export default function AchatDetail() {
 
                   {/* Sélecteur de statut + actions */}
                   <div className="flex items-center justify-between sm:justify-end gap-2.5 pt-2 sm:pt-0 border-t sm:border-t-0 border-[#F1E6D6]">
-                    <select
-                      aria-label={`Statut de ${article.nom}`}
-                      value={article.statut}
-                      onChange={(e) => handleChangeStatutArticle(article, e.target.value)}
-                      className={`px-3.5 py-2 rounded-full text-xs font-semibold border border-[#E8D8C3] focus:outline-none focus:border-[#6B4226] cursor-pointer ${
-                        article.statut === 'ACHETE'
-                          ? 'bg-[#E7ECE1] text-[#718355]'
-                          : article.statut === 'MIS_DE_COTE'
-                          ? 'bg-[#F8EFE2] text-[#C58B45]'
-                          : 'bg-[#F1E6D6] text-[#332821]'
-                      }`}
-                    >
-                      {STATUTS_ARTICLE.map((st) => (
-                        <option key={st.value} value={st.value}>
-                          {st.label}
-                        </option>
-                      ))}
-                    </select>
+                    {isBought ? (
+                      <span
+                        aria-label={`Statut de ${article.nom}`}
+                        title="Article acheté — état verrouillé"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold bg-[#E7ECE1] text-[#718355] border border-[#718355]/30 select-none"
+                      >
+                        <span>✓ Acheté (Terminé)</span>
+                      </span>
+                    ) : (
+                      <>
+                        <select
+                          aria-label={`Statut de ${article.nom}`}
+                          value={article.statut}
+                          onChange={(e) => handleChangeStatutArticle(article, e.target.value)}
+                          className={`px-3.5 py-2 rounded-full text-xs font-semibold border border-[#E8D8C3] focus:outline-none focus:border-[#6B4226] cursor-pointer ${
+                            article.statut === 'MIS_DE_COTE'
+                              ? 'bg-[#F8EFE2] text-[#C58B45]'
+                              : 'bg-[#F1E6D6] text-[#332821]'
+                          }`}
+                        >
+                          {STATUTS_ARTICLE.map((st) => (
+                            <option key={st.value} value={st.value}>
+                              {st.label}
+                            </option>
+                          ))}
+                        </select>
 
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditingArticle(article)
-                        setIsArticleModalOpen(true)
-                      }}
-                      aria-label={`Modifier ${article.nom}`}
-                      className="p-2 rounded-full bg-[#EFE6D8] hover:bg-[#E8D8C3] text-[#332821] transition-colors"
-                    >
-                      <Pencil className="w-3.5 h-3.5" />
-                    </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingArticle(article)
+                            setIsArticleModalOpen(true)
+                          }}
+                          aria-label={`Modifier ${article.nom}`}
+                          className="p-2 rounded-full bg-[#EFE6D8] hover:bg-[#E8D8C3] text-[#332821] transition-colors"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                      </>
+                    )}
 
                     <button
                       type="button"

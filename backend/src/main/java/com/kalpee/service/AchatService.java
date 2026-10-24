@@ -81,6 +81,12 @@ public class AchatService {
     @Transactional
     public AchatDto modifierAchat(Long utilisateurId, Long achatId, AchatRequestDto dto) {
         Achat achat = getAchatOrThrow(utilisateurId, achatId);
+        if (mapper.toAchatDto(achat).statut() == StatutAchat.TERMINE) {
+            throw new KalpeeException(
+                    CodeErreur.VALIDATION_ERROR,
+                    "Cet achat est terminé, il ne peut plus être modifié."
+            );
+        }
         achat.setNom(dto.nom().trim());
         achat.setDescription(dto.description() != null ? dto.description().trim() : null);
         achat.setPriorite(dto.priorite());
