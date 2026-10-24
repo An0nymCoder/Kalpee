@@ -10,7 +10,8 @@ import AchatDetail from './pages/AchatDetail'
 import Tirelire from './pages/Tirelire'
 import Objectifs from './pages/Objectifs'
 import Profil from './pages/Profil'
-import Admin from './pages/Admin'
+import AdminDashboard from './pages/AdminDashboard'
+import AdminUtilisateurs from './pages/AdminUtilisateurs'
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth()
@@ -36,17 +37,38 @@ function ProtectedRoute({ children }) {
 }
 
 function PublicOnlyRoute({ children }) {
-  const { isAuthenticated, loading } = useAuth()
+  const { isAuthenticated, loading, user } = useAuth()
 
   if (loading) {
     return null
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />
+    return <Navigate to={user?.role === 'ADMIN' ? '/admin/dashboard' : '/dashboard'} replace />
   }
 
   return children
+}
+
+function UserOnlyRoute({ children }) {
+  const { user } = useAuth()
+  if (user?.role === 'ADMIN') {
+    return <Navigate to="/admin/dashboard" replace />
+  }
+  return children
+}
+
+function AdminOnlyRoute({ children }) {
+  const { user } = useAuth()
+  if (user?.role !== 'ADMIN') {
+    return <Navigate to="/dashboard" replace />
+  }
+  return children
+}
+
+function DefaultRedirect() {
+  const { user } = useAuth()
+  return <Navigate to={user?.role === 'ADMIN' ? '/admin/dashboard' : '/dashboard'} replace />
 }
 
 export default function App() {
@@ -76,18 +98,75 @@ export default function App() {
           </ProtectedRoute>
         }
       >
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/achats" element={<Achats />} />
-        <Route path="/achats/:id" element={<AchatDetail />} />
-        <Route path="/tirelire" element={<Tirelire />} />
-        <Route path="/objectifs" element={<Objectifs />} />
+        <Route path="/" element={<DefaultRedirect />} />
+
+        {/* Routes Utilisateur classique */}
+        <Route
+          path="/dashboard"
+          element={
+            <UserOnlyRoute>
+              <Dashboard />
+            </UserOnlyRoute>
+          }
+        />
+        <Route
+          path="/achats"
+          element={
+            <UserOnlyRoute>
+              <Achats />
+            </UserOnlyRoute>
+          }
+        />
+        <Route
+          path="/achats/:id"
+          element={
+            <UserOnlyRoute>
+              <AchatDetail />
+            </UserOnlyRoute>
+          }
+        />
+        <Route
+          path="/tirelire"
+          element={
+            <UserOnlyRoute>
+              <Tirelire />
+            </UserOnlyRoute>
+          }
+        />
+        <Route
+          path="/objectifs"
+          element={
+            <UserOnlyRoute>
+              <Objectifs />
+            </UserOnlyRoute>
+          }
+        />
+
+        {/* Routes Administrateur exclusives */}
+        <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+        <Route
+          path="/admin/dashboard"
+          element={
+            <AdminOnlyRoute>
+              <AdminDashboard />
+            </AdminOnlyRoute>
+          }
+        />
+        <Route
+          path="/admin/utilisateurs"
+          element={
+            <AdminOnlyRoute>
+              <AdminUtilisateurs />
+            </AdminOnlyRoute>
+          }
+        />
+
+        {/* Mon compte (accessible à tous) */}
         <Route path="/profil" element={<Profil />} />
         <Route path="/compte" element={<Profil />} />
-        <Route path="/admin" element={<Admin />} />
       </Route>
 
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="*" element={<DefaultRedirect />} />
     </Routes>
   )
 }

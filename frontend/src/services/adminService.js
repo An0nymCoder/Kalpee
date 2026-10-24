@@ -5,6 +5,11 @@ export async function getAdminDashboard() {
   return data
 }
 
+export async function updateUser(userId, payload) {
+  const { data } = await api.put(`/admin/utilisateurs/${userId}`, payload)
+  return data
+}
+
 export async function updateUserRole(userId, role) {
   const { data } = await api.patch(`/admin/utilisateurs/${userId}/role`, { role })
   return data

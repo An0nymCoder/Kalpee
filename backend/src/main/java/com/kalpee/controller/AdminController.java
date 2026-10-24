@@ -1,6 +1,7 @@
 package com.kalpee.controller;
 
 import com.kalpee.dto.AdminDashboardDto;
+import com.kalpee.dto.AdminUpdateUserRequestDto;
 import com.kalpee.dto.AdminUserDto;
 import com.kalpee.dto.UpdateUserRoleRequestDto;
 import com.kalpee.security.SecurityUtils;
@@ -22,6 +23,15 @@ public class AdminController {
     @GetMapping("/dashboard")
     public ResponseEntity<AdminDashboardDto> obtenirDashboardAdmin() {
         return ResponseEntity.ok(adminService.obtenirDashboardAdmin());
+    }
+
+    @PutMapping("/utilisateurs/{id}")
+    public ResponseEntity<AdminUserDto> modifierUtilisateur(
+            @PathVariable Long id,
+            @Valid @RequestBody AdminUpdateUserRequestDto dto
+    ) {
+        Long adminId = SecurityUtils.getCurrentUserId();
+        return ResponseEntity.ok(adminService.modifierUtilisateur(adminId, id, dto));
     }
 
     @PatchMapping("/utilisateurs/{id}/role")

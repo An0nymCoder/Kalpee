@@ -1,17 +1,21 @@
 package com.kalpee.service;
 
 import com.kalpee.dto.AdminDashboardDto;
+import com.kalpee.dto.AdminUpdateUserRequestDto;
 import com.kalpee.dto.AdminUserDto;
 import com.kalpee.entity.*;
 import com.kalpee.exception.CodeErreur;
 import com.kalpee.exception.KalpeeException;
 import com.kalpee.repository.*;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 @Service
 public class AdminService {
@@ -24,6 +28,7 @@ public class AdminService {
     private final TransactionRepository transactionRepository;
     private final ObjectifEpargneRepository objectifRepository;
     private final StockagePhoto stockagePhoto;
+    private final PasswordEncoder passwordEncoder;
 
     public AdminService(
             UtilisateurRepository utilisateurRepository,
@@ -33,7 +38,8 @@ public class AdminService {
             TirelireRepository tirelireRepository,
             TransactionRepository transactionRepository,
             ObjectifEpargneRepository objectifRepository,
-            StockagePhoto stockagePhoto
+            StockagePhoto stockagePhoto,
+            PasswordEncoder passwordEncoder
     ) {
         this.utilisateurRepository = utilisateurRepository;
         this.compteExterneRepository = compteExterneRepository;
@@ -43,6 +49,7 @@ public class AdminService {
         this.transactionRepository = transactionRepository;
         this.objectifRepository = objectifRepository;
         this.stockagePhoto = stockagePhoto;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional(readOnly = true)
@@ -145,6 +152,65 @@ public class AdminService {
                 totalTransactions,
                 totalObjectifs,
                 userDtos
+        );
+    }
+
+    @Transactional
+    public AdminUserDto modifierUtilisateur(Long adminId, Long cibleId, AdminUpdateUserRequestDto dto) {
+        if (adminId.equals(cibleId) && dto.role() != RoleUtilisateur.ADMIN) {
+            throw new KalpeeException(
+                    CodeErreur.VALIDATION_ERROR,
+                    "Tu ne peux pas retirer ton propre rôle administrateur."
+            );
+        }
+        Utilisateur cible = utilisateurRepository.findById(cibleId)
+                .orElseThrow(() -> new KalpeeException(CodeErreur.NOT_FOUND, "Utilisateur introuvable."));
+
+        String newEmail = dto.email().trim().toLowerCase(Locale.ROOT);
+        if (!cible.getEmail().equalsIgnoreCase(newEmail) && utilisateurRepository.existsByEmailIgnoreCase(newEmail)) {
+            throw new KalpeeException(
+                    CodeErreur.EMAIL_ALREADY_USED,
+                    "Cette adresse e-mail est déjà utilisée.",
+                    Map.of("email", "Cette adresse e-mail est déjà utilisée")
+            );
+        }
+
+        cible.setNom(dto.nom().trim());
+        cible.setPrenom(dto.prenom().trim());
+        cible.setEmail(newEmail);
+        cible.setRole(dto.role());
+
+        if (dto.nouveauMotDePasse() != null && !dto.nouveauMotDePasse().isBlank()) {
+            cible.setMotDePasseHash(passwordEncoder.encode(dto.nouveauMotDePasse()));
+            cible.setMotDePasseSupprimeParLiaisonGoogle(false);
+        }
+
+        Utilisateur saved = utilisateurRepository.save(cible);
+
+        boolean google = compteExterneRepository.existsByUtilisateurIdAndFournisseur(saved.getId(), FournisseurExterne.GOOGLE);
+        List<Achat> achatsUser = achatRepository.findByUtilisateurIdOrderByDateCreationDesc(saved.getId());
+        int nbArticles = achatsUser.stream()
+                .mapToInt(a -> a.getArticles() != null ? a.getArticles().size() : 0)
+                .sum();
+        long soldeUser = tirelireRepository.findByUtilisateurId(saved.getId())
+                .map(t -> transactionRepository.sumMontantByTirelireIdAndType(t.getId(), TypeTransaction.DEPOT)
+                        - transactionRepository.sumMontantByTirelireIdAndType(t.getId(), TypeTransaction.RETRAIT))
+                .orElse(0L);
+        int nbObjectifs = objectifRepository.findByUtilisateurIdOrderByDateCreationDesc(saved.getId()).size();
+
+        return new AdminUserDto(
+                saved.getId(),
+                saved.getNom(),
+                saved.getPrenom(),
+                saved.getEmail(),
+                saved.getRole(),
+                google,
+                saved.aMotDePasse(),
+                achatsUser.size(),
+                nbArticles,
+                soldeUser,
+                nbObjectifs,
+                saved.getDateCreation()
         );
     }
 

@@ -1,59 +1,63 @@
 import React from 'react'
 import { NavLink, Link } from 'react-router-dom'
-import { LayoutGrid, ShoppingBag, PiggyBank, Target, ShieldCheck } from 'lucide-react'
+import { LayoutGrid, ShoppingBag, PiggyBank, Target, Users } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 
-const navItems = [
+const userNavItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutGrid },
   { to: '/achats', label: 'Mes achats', icon: ShoppingBag },
   { to: '/tirelire', label: 'Ma tirelire', icon: PiggyBank },
   { to: '/objectifs', label: 'Objectifs', icon: Target },
 ]
 
+const adminNavItems = [
+  { to: '/admin/dashboard', label: 'Dashboard', icon: LayoutGrid },
+  { to: '/admin/utilisateurs', label: 'Utilisateurs', icon: Users },
+]
+
 export default function MobileNav() {
   const { user } = useAuth()
+  const isAdmin = user?.role === 'ADMIN'
+  const navItems = isAdmin ? adminNavItems : userNavItems
   const initials = `${user?.prenom?.[0] || ''}${user?.nom?.[0] || ''}`.toUpperCase() || 'K'
 
   return (
     <>
       {/* Top Bar Mobile */}
       <header className="md:hidden sticky top-0 z-30 bg-[#FFFDF9]/95 backdrop-blur-sm border-b border-[#E8D8C3] px-4 py-3 flex items-center justify-between">
-        <Link to="/dashboard" className="flex items-center gap-2.5">
+        <Link
+          to={isAdmin ? '/admin/dashboard' : '/dashboard'}
+          className="flex items-center gap-2.5"
+        >
           <div className="w-8 h-8 rounded-full bg-[#2A1B12] text-[#FFFDF9] flex items-center justify-center font-serif text-base">
             K
           </div>
           <span className="font-serif text-xl text-[#332821]">Kalpee</span>
+          {isAdmin && (
+            <span className="px-2 py-0.5 rounded-full bg-[#6B4226]/15 text-[#6B4226] text-[10px] font-bold uppercase tracking-wider">
+              Admin
+            </span>
+          )}
         </Link>
 
-        <div className="flex items-center gap-2">
-          {user?.role === 'ADMIN' && (
-            <Link
-              to="/admin"
-              aria-label="Administration"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#6B4226] text-[#FFFDF9] text-xs font-medium"
-            >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Admin</span>
-            </Link>
-          )}
-
-          <Link
-            to="/profil"
-            aria-label="Mon compte"
-            className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#F1E6D6] text-[#332821] text-xs font-medium"
-          >
-            <span className="w-6 h-6 rounded-full bg-[#6B4226] text-white flex items-center justify-center text-[11px] font-semibold">
-              {initials}
-            </span>
-            <span>Mon compte</span>
-          </Link>
-        </div>
+        <Link
+          to="/profil"
+          aria-label="Mon compte"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#F1E6D6] text-[#332821] text-xs font-medium"
+        >
+          <span className="w-6 h-6 rounded-full bg-[#6B4226] text-white flex items-center justify-center text-[11px] font-semibold">
+            {initials}
+          </span>
+          <span>Mon compte</span>
+        </Link>
       </header>
 
-      {/* Bottom Navigation Mobile (4 entrées) */}
+      {/* Bottom Navigation Mobile */}
       <nav
         aria-label="Navigation mobile"
-        className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-[#FFFDF9] border-t border-[#E8D8C3] px-2 py-1.5 grid grid-cols-4 gap-1"
+        className={`md:hidden fixed bottom-0 inset-x-0 z-30 bg-[#FFFDF9] border-t border-[#E8D8C3] px-2 py-1.5 grid ${
+          isAdmin ? 'grid-cols-2' : 'grid-cols-4'
+        } gap-1`}
       >
         {navItems.map(({ to, label, icon: Icon }) => (
           <NavLink

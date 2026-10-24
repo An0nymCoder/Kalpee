@@ -5,24 +5,32 @@ import {
   ShoppingBag,
   PiggyBank,
   Target,
+  Users,
   Settings,
-  ShieldCheck,
   LogOut,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 
-const mainNavItems = [
+const userNavItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutGrid },
   { to: '/achats', label: 'Mes achats', icon: ShoppingBag },
   { to: '/tirelire', label: 'Ma tirelire', icon: PiggyBank },
   { to: '/objectifs', label: 'Objectifs', icon: Target },
 ]
 
+const adminNavItems = [
+  { to: '/admin/dashboard', label: 'Dashboard', icon: LayoutGrid },
+  { to: '/admin/utilisateurs', label: 'Utilisateurs', icon: Users },
+]
+
 export default function Sidebar() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const toast = useToast()
+
+  const isAdmin = user?.role === 'ADMIN'
+  const navItems = isAdmin ? adminNavItems : userNavItems
 
   const initials = `${user?.prenom?.[0] || ''}${user?.nom?.[0] || ''}`.toUpperCase() || 'K'
   const fullName = user ? `${user.prenom} ${user.nom}` : 'Mon compte'
@@ -40,20 +48,27 @@ export default function Sidebar() {
         <div className="w-10 h-10 rounded-full bg-[#2A1B12] text-[#FFFDF9] flex items-center justify-center font-serif text-lg tracking-wider shadow-sm">
           K
         </div>
-        <span className="font-serif text-2xl text-[#332821] tracking-tight">
-          Kalpee
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="font-serif text-2xl text-[#332821] tracking-tight">
+            Kalpee
+          </span>
+          {isAdmin && (
+            <span className="px-2 py-0.5 rounded-full bg-[#6B4226]/15 text-[#6B4226] text-[10px] font-bold uppercase tracking-wider">
+              Admin
+            </span>
+          )}
+        </div>
       </div>
 
-      {/* Section PRINCIPAL */}
+      {/* Section PRINCIPAL / ADMINISTRATION */}
       <div className="px-3 mb-2">
         <span className="text-[11px] font-semibold uppercase tracking-widest text-[#806F62]">
-          Principal
+          {isAdmin ? 'Administration' : 'Principal'}
         </span>
       </div>
 
       <nav className="space-y-1.5" aria-label="Navigation principale">
-        {mainNavItems.map(({ to, label, icon: Icon }) => (
+        {navItems.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}
             to={to}
@@ -73,24 +88,8 @@ export default function Sidebar() {
 
       <div className="my-5 border-t border-[#E8D8C3]/80" />
 
-      {/* Mon compte (remplace Paramètres & Abonnement) */}
+      {/* Mon compte */}
       <nav aria-label="Compte" className="space-y-1.5">
-        {user?.role === 'ADMIN' && (
-          <NavLink
-            to="/admin"
-            className={({ isActive }) =>
-              `flex items-center gap-3.5 px-4 py-3 rounded-full text-sm font-medium transition-all ${
-                isActive
-                  ? 'bg-[#6B4226] text-[#FFFDF9] shadow-sm'
-                  : 'text-[#6B4226] bg-[#F7F1E8] hover:bg-[#F1E6D6]'
-              }`
-            }
-          >
-            <ShieldCheck className="w-4 h-4 shrink-0" />
-            <span>Administration</span>
-          </NavLink>
-        )}
-
         <NavLink
           to="/profil"
           className={({ isActive }) =>

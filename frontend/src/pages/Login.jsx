@@ -46,7 +46,7 @@ export default function Login() {
     try {
       const loggedUser = await login(values)
       toast.success('Bon retour sur Kalpee !')
-      navigate(loggedUser?.role === 'ADMIN' ? '/admin' : '/dashboard')
+      navigate(loggedUser?.role === 'ADMIN' ? '/admin/dashboard' : '/dashboard')
     } catch (err) {
       const fieldErrors = extractFieldErrors(err)
       Object.entries(fieldErrors).forEach(([field, msg]) => {

@@ -69,7 +69,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             if (result.motDePasseSupprimeParLiaison()) {
                 response.sendRedirect(frontendUrl + "/profil?googleLinked=true");
             } else if (result.utilisateur().getRole() == RoleUtilisateur.ADMIN) {
-                response.sendRedirect(frontendUrl + "/admin");
+                response.sendRedirect(frontendUrl + "/admin/dashboard");
             } else {
                 response.sendRedirect(frontendUrl + "/dashboard");
             }
