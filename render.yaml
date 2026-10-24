@@ -1,0 +1,35 @@
+databases:
+  - name: kalpee-postgres
+    plan: free
+    databaseName: kalpee
+    user: kalpee
+
+services:
+  - type: web
+    name: kalpee-backend
+    runtime: docker
+    rootDir: backend
+    plan: free
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: kalpee-postgres
+          property: connectionString
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: kalpee-postgres
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: kalpee-postgres
+          property: password
+      - key: KALPEE_JWT_SECRET
+        generateValue: true
+      - key: KALPEE_COOKIE_SECURE
+        value: "true"
+      - key: KALPEE_FRONTEND_URL
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
