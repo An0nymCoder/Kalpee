@@ -29,6 +29,10 @@ public class Utilisateur {
     @Column(name = "mot_de_passe_supprime_par_liaison_google", nullable = false)
     private boolean motDePasseSupprimeParLiaisonGoogle = false;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false, length = 20)
+    private RoleUtilisateur role = RoleUtilisateur.USER;
+
     @Column(name = "date_creation", nullable = false, updatable = false)
     private Instant dateCreation = Instant.now();
 
@@ -87,6 +91,14 @@ public class Utilisateur {
 
     public void setMotDePasseSupprimeParLiaisonGoogle(boolean motDePasseSupprimeParLiaisonGoogle) {
         this.motDePasseSupprimeParLiaisonGoogle = motDePasseSupprimeParLiaisonGoogle;
+    }
+
+    public RoleUtilisateur getRole() {
+        return role;
+    }
+
+    public void setRole(RoleUtilisateur role) {
+        this.role = role;
     }
 
     public Instant getDateCreation() {

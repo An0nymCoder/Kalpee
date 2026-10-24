@@ -18,6 +18,7 @@ public class KalpeeMapper {
                 utilisateur.getNom(),
                 utilisateur.getPrenom(),
                 utilisateur.getEmail(),
+                utilisateur.getRole() != null ? utilisateur.getRole() : RoleUtilisateur.USER,
                 utilisateur.aMotDePasse(),
                 connexionGoogle,
                 utilisateur.isMotDePasseSupprimeParLiaisonGoogle(),

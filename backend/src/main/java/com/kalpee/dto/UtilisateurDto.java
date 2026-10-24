@@ -1,5 +1,7 @@
 package com.kalpee.dto;
 
+import com.kalpee.entity.RoleUtilisateur;
+
 import java.time.Instant;
 
 public record UtilisateurDto(
@@ -7,6 +9,7 @@ public record UtilisateurDto(
         String nom,
         String prenom,
         String email,
+        RoleUtilisateur role,
         boolean aMotDePasse,
         boolean connexionGoogle,
         boolean motDePasseSupprimeParLiaisonGoogle,

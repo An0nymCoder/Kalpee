@@ -1,5 +1,6 @@
 package com.kalpee.security;
 
+import com.kalpee.entity.RoleUtilisateur;
 import com.kalpee.entity.Utilisateur;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -44,9 +45,11 @@ public class JwtService {
     public String generateToken(Utilisateur utilisateur) {
         Instant now = Instant.now();
         Instant expiry = now.plusSeconds(expirationSeconds);
+        RoleUtilisateur role = utilisateur.getRole() != null ? utilisateur.getRole() : RoleUtilisateur.USER;
         return Jwts.builder()
                 .subject(String.valueOf(utilisateur.getId()))
                 .claim("email", utilisateur.getEmail())
+                .claim("role", role.name())
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(expiry))
                 .signWith(secretKey)
@@ -62,7 +65,15 @@ public class JwtService {
                     .getPayload();
             Long userId = Long.parseLong(claims.getSubject());
             String email = claims.get("email", String.class);
-            return Optional.of(new KalpeePrincipal(userId, email));
+            String roleStr = claims.get("role", String.class);
+            RoleUtilisateur role = RoleUtilisateur.USER;
+            if (roleStr != null) {
+                try {
+                    role = RoleUtilisateur.valueOf(roleStr);
+                } catch (IllegalArgumentException ignored) {
+                }
+            }
+            return Optional.of(new KalpeePrincipal(userId, email, role));
         } catch (Exception e) {
             return Optional.empty();
         }
