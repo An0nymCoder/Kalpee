@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://REMPLACER_PAR_TON_BACKEND_URL/api/:path*"
+      "destination": "http://13.62.103.201:8080/api/:path*"
     },
     {
       "source": "/((?!api/).*)",
