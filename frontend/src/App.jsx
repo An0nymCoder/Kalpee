@@ -10,6 +10,7 @@ import AchatDetail from './pages/AchatDetail'
 import Tirelire from './pages/Tirelire'
 import Objectifs from './pages/Objectifs'
 import Profil from './pages/Profil'
+import Admin from './pages/Admin'
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth()
@@ -83,6 +84,7 @@ export default function App() {
         <Route path="/objectifs" element={<Objectifs />} />
         <Route path="/profil" element={<Profil />} />
         <Route path="/compte" element={<Profil />} />
+        <Route path="/admin" element={<Admin />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

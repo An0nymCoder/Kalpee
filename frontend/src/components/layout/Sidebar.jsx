@@ -6,6 +6,7 @@ import {
   PiggyBank,
   Target,
   Settings,
+  ShieldCheck,
   LogOut,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
@@ -73,7 +74,23 @@ export default function Sidebar() {
       <div className="my-5 border-t border-[#E8D8C3]/80" />
 
       {/* Mon compte (remplace Paramètres & Abonnement) */}
-      <nav aria-label="Compte">
+      <nav aria-label="Compte" className="space-y-1.5">
+        {user?.role === 'ADMIN' && (
+          <NavLink
+            to="/admin"
+            className={({ isActive }) =>
+              `flex items-center gap-3.5 px-4 py-3 rounded-full text-sm font-medium transition-all ${
+                isActive
+                  ? 'bg-[#6B4226] text-[#FFFDF9] shadow-sm'
+                  : 'text-[#6B4226] bg-[#F7F1E8] hover:bg-[#F1E6D6]'
+              }`
+            }
+          >
+            <ShieldCheck className="w-4 h-4 shrink-0" />
+            <span>Administration</span>
+          </NavLink>
+        )}
+
         <NavLink
           to="/profil"
           className={({ isActive }) =>

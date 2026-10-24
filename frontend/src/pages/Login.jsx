@@ -44,9 +44,9 @@ export default function Login() {
   const onSubmit = async (values) => {
     setServerError('')
     try {
-      await login(values)
+      const loggedUser = await login(values)
       toast.success('Bon retour sur Kalpee !')
-      navigate('/dashboard')
+      navigate(loggedUser?.role === 'ADMIN' ? '/admin' : '/dashboard')
     } catch (err) {
       const fieldErrors = extractFieldErrors(err)
       Object.entries(fieldErrors).forEach(([field, msg]) => {

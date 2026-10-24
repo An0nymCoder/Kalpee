@@ -127,15 +127,17 @@ public class AuthService {
         if (existantParEmail.isPresent()) {
             Utilisateur u = existantParEmail.get();
             boolean avaitMotDePasse = u.aMotDePasse();
-            if (avaitMotDePasse) {
+            boolean motDePasseSupprime = false;
+            if (avaitMotDePasse && u.getRole() != RoleUtilisateur.ADMIN) {
                 // D13 : Liaison automatique et suppression de l'ancien mot de passe
                 u.setMotDePasseHash(null);
                 u.setMotDePasseSupprimeParLiaisonGoogle(true);
+                motDePasseSupprime = true;
             }
             utilisateurRepository.save(u);
             CompteExterne compteExterne = new CompteExterne(u, fournisseur, identifiantExterne);
             compteExterneRepository.save(compteExterne);
-            return new OAuth2LoginResult(u, avaitMotDePasse);
+            return new OAuth2LoginResult(u, motDePasseSupprime);
         }
 
         // Création d'un nouvel utilisateur Google

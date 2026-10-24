@@ -73,12 +73,14 @@ public class OidcAuthenticationFilter extends OncePerRequestFilter {
 
                 KalpeePrincipal principal = new KalpeePrincipal(
                         result.utilisateur().getId(),
-                        result.utilisateur().getEmail()
+                        result.utilisateur().getEmail(),
+                        result.utilisateur().getRole()
                 );
+                String roleAuthority = "ROLE_" + (principal.role() != null ? principal.role().name() : "USER");
                 UsernamePasswordAuthenticationToken newAuth = new UsernamePasswordAuthenticationToken(
                         principal,
                         null,
-                        List.of(new SimpleGrantedAuthority("ROLE_USER"))
+                        List.of(new SimpleGrantedAuthority("ROLE_USER"), new SimpleGrantedAuthority(roleAuthority))
                 );
                 SecurityContextHolder.getContext().setAuthentication(newAuth);
 

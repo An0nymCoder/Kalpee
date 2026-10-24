@@ -34,10 +34,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             extractToken(request)
                     .flatMap(jwtService::parseToken)
                     .ifPresent(principal -> {
+                        String roleAuthority = "ROLE_" + (principal.role() != null ? principal.role().name() : "USER");
                         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                                 principal,
                                 null,
-                                List.of(new SimpleGrantedAuthority("ROLE_USER"))
+                                List.of(new SimpleGrantedAuthority("ROLE_USER"), new SimpleGrantedAuthority(roleAuthority))
                         );
                         SecurityContextHolder.getContext().setAuthentication(auth);
                     });

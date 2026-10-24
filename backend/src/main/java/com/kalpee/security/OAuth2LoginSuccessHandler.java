@@ -1,6 +1,7 @@
 package com.kalpee.security;
 
 import com.kalpee.entity.FournisseurExterne;
+import com.kalpee.entity.RoleUtilisateur;
 import com.kalpee.exception.KalpeeException;
 import com.kalpee.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -67,6 +68,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
             if (result.motDePasseSupprimeParLiaison()) {
                 response.sendRedirect(frontendUrl + "/profil?googleLinked=true");
+            } else if (result.utilisateur().getRole() == RoleUtilisateur.ADMIN) {
+                response.sendRedirect(frontendUrl + "/admin");
             } else {
                 response.sendRedirect(frontendUrl + "/dashboard");
             }
