@@ -1,0 +1,46 @@
+{
+  "name": "Kalpee — Planifie tes achats et ton épargne",
+  "short_name": "Kalpee",
+  "description": "Organise tes projets d'achat, suis ta tirelire et atteins tes objectifs d'épargne en FCFA.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F7F1E8",
+  "theme_color": "#F7F1E8",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Mon Dashboard",
+      "short_name": "Dashboard",
+      "url": "/dashboard",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Ma tirelire",
+      "short_name": "Tirelire",
+      "url": "/tirelire",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Mes achats",
+      "short_name": "Achats",
+      "url": "/achats",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

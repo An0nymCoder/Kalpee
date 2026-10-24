@@ -11,6 +11,7 @@ import Tirelire from './pages/Tirelire'
 import Objectifs from './pages/Objectifs'
 import Profil from './pages/Profil'
 import Admin from './pages/Admin'
+import InstallPwaPrompt from './components/ui/InstallPwaPrompt'
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth()
@@ -72,7 +73,9 @@ function DefaultRedirect() {
 
 export default function App() {
   return (
-    <Routes>
+    <>
+      <InstallPwaPrompt />
+      <Routes>
       <Route
         path="/login"
         element={
@@ -170,6 +173,7 @@ export default function App() {
       </Route>
 
       <Route path="*" element={<DefaultRedirect />} />
-    </Routes>
+      </Routes>
+    </>
   )
 }
