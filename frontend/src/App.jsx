@@ -10,8 +10,7 @@ import AchatDetail from './pages/AchatDetail'
 import Tirelire from './pages/Tirelire'
 import Objectifs from './pages/Objectifs'
 import Profil from './pages/Profil'
-import AdminDashboard from './pages/AdminDashboard'
-import AdminUtilisateurs from './pages/AdminUtilisateurs'
+import Admin from './pages/Admin'
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth()
@@ -44,7 +43,7 @@ function PublicOnlyRoute({ children }) {
   }
 
   if (isAuthenticated) {
-    return <Navigate to={user?.role === 'ADMIN' ? '/admin/dashboard' : '/dashboard'} replace />
+    return <Navigate to={user?.role === 'ADMIN' ? '/admin' : '/dashboard'} replace />
   }
 
   return children
@@ -53,7 +52,7 @@ function PublicOnlyRoute({ children }) {
 function UserOnlyRoute({ children }) {
   const { user } = useAuth()
   if (user?.role === 'ADMIN') {
-    return <Navigate to="/admin/dashboard" replace />
+    return <Navigate to="/admin" replace />
   }
   return children
 }
@@ -68,7 +67,7 @@ function AdminOnlyRoute({ children }) {
 
 function DefaultRedirect() {
   const { user } = useAuth()
-  return <Navigate to={user?.role === 'ADMIN' ? '/admin/dashboard' : '/dashboard'} replace />
+  return <Navigate to={user?.role === 'ADMIN' ? '/admin' : '/dashboard'} replace />
 }
 
 export default function App() {
@@ -141,29 +140,33 @@ export default function App() {
             </UserOnlyRoute>
           }
         />
-
-        {/* Routes Administrateur exclusives */}
-        <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
         <Route
-          path="/admin/dashboard"
+          path="/profil"
           element={
-            <AdminOnlyRoute>
-              <AdminDashboard />
-            </AdminOnlyRoute>
+            <UserOnlyRoute>
+              <Profil />
+            </UserOnlyRoute>
           }
         />
         <Route
-          path="/admin/utilisateurs"
+          path="/compte"
           element={
-            <AdminOnlyRoute>
-              <AdminUtilisateurs />
-            </AdminOnlyRoute>
+            <UserOnlyRoute>
+              <Profil />
+            </UserOnlyRoute>
           }
         />
 
-        {/* Mon compte (accessible à tous) */}
-        <Route path="/profil" element={<Profil />} />
-        <Route path="/compte" element={<Profil />} />
+        {/* Partie Administration unique pour l'Admin */}
+        <Route
+          path="/admin"
+          element={
+            <AdminOnlyRoute>
+              <Admin />
+            </AdminOnlyRoute>
+          }
+        />
+        <Route path="/admin/*" element={<Navigate to="/admin" replace />} />
       </Route>
 
       <Route path="*" element={<DefaultRedirect />} />

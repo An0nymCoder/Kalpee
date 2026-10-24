@@ -5,7 +5,7 @@ import {
   ShoppingBag,
   PiggyBank,
   Target,
-  Users,
+  ShieldCheck,
   Settings,
   LogOut,
 } from 'lucide-react'
@@ -20,8 +20,7 @@ const userNavItems = [
 ]
 
 const adminNavItems = [
-  { to: '/admin/dashboard', label: 'Dashboard', icon: LayoutGrid },
-  { to: '/admin/utilisateurs', label: 'Utilisateurs', icon: Users },
+  { to: '/admin', label: 'Administration', icon: ShieldCheck },
 ]
 
 export default function Sidebar() {
@@ -86,45 +85,43 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      <div className="my-5 border-t border-[#E8D8C3]/80" />
-
-      {/* Mon compte */}
-      <nav aria-label="Compte" className="space-y-1.5">
-        <NavLink
-          to="/profil"
-          className={({ isActive }) =>
-            `flex items-center gap-3.5 px-4 py-3 rounded-full text-sm font-medium transition-all ${
-              isActive
-                ? 'bg-[#6B4226] text-[#FFFDF9] shadow-sm'
-                : 'text-[#332821] hover:bg-[#F1E6D6]/70'
-            }`
-          }
-        >
-          <Settings className="w-4 h-4 shrink-0" />
-          <span>Mon compte</span>
-        </NavLink>
-      </nav>
+      {!isAdmin && (
+        <>
+          <div className="my-5 border-t border-[#E8D8C3]/80" />
+          <nav aria-label="Compte" className="space-y-1.5">
+            <NavLink
+              to="/profil"
+              className={({ isActive }) =>
+                `flex items-center gap-3.5 px-4 py-3 rounded-full text-sm font-medium transition-all ${
+                  isActive
+                    ? 'bg-[#6B4226] text-[#FFFDF9] shadow-sm'
+                    : 'text-[#332821] hover:bg-[#F1E6D6]/70'
+                }`
+              }
+            >
+              <Settings className="w-4 h-4 shrink-0" />
+              <span>Mon compte</span>
+            </NavLink>
+          </nav>
+        </>
+      )}
 
       <div className="mt-auto pt-6 space-y-2">
         {/* Carte utilisateur en bas de la sidebar */}
         <div className="p-3 rounded-2xl bg-[#F7F1E8] border border-[#E8D8C3]/90 flex items-center justify-between gap-2">
-          <button
-            type="button"
-            onClick={() => navigate('/profil')}
-            className="flex items-center gap-3 text-left min-w-0 flex-1 group"
-          >
+          <div className="flex items-center gap-3 text-left min-w-0 flex-1">
             <div className="w-10 h-10 rounded-full bg-[#6B4226] text-[#FFFDF9] font-semibold text-sm flex items-center justify-center shrink-0">
               {initials}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-[#332821] truncate group-hover:text-[#6B4226] transition-colors">
+              <p className="text-sm font-semibold text-[#332821] truncate">
                 {fullName}
               </p>
               <p className="text-xs text-[#806F62] truncate">
-                Gérer mon compte
+                {isAdmin ? 'Administrateur' : 'Gérer mon compte'}
               </p>
             </div>
-          </button>
+          </div>
 
           <button
             type="button"

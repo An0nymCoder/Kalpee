@@ -66,10 +66,10 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             ResponseCookie cookie = jwtService.createSessionCookie(result.utilisateur());
             response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-            if (result.motDePasseSupprimeParLiaison()) {
+            if (result.utilisateur().getRole() == RoleUtilisateur.ADMIN) {
+                response.sendRedirect(frontendUrl + "/admin");
+            } else if (result.motDePasseSupprimeParLiaison()) {
                 response.sendRedirect(frontendUrl + "/profil?googleLinked=true");
-            } else if (result.utilisateur().getRole() == RoleUtilisateur.ADMIN) {
-                response.sendRedirect(frontendUrl + "/admin/dashboard");
             } else {
                 response.sendRedirect(frontendUrl + "/dashboard");
             }
